@@ -1,4 +1,7 @@
-package solidfiretypes
+package types
+
+type Frequency struct {
+}
 
 type CHAPSecret struct {
 	Secret string
@@ -678,7 +681,7 @@ type NodeWaitingToJoin struct {
 }
 
 type Origin struct {
-	Signature        Signature `json:"&lt;signature&gt;"`
+	Signature        Signature `json:"signature"`
 	Contractdate     string    `json:"contract-date"`
 	Contractname     string    `json:"contract-name"`
 	Contractquantity int64     `json:"contract-quantity"`
