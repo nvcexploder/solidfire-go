@@ -1114,11 +1114,11 @@ type VolumePair struct {
 }
 
 type VolumeQOS struct {
-	MinIOPS   int64 `json:"minIOPS"`
-	MaxIOPS   int64 `json:"maxIOPS"`
-	BurstIOPS int64 `json:"burstIOPS"`
-	BurstTime int64 `json:"burstTime"`
-	Curve     int64 `json:"curve"`
+	MinIOPS   int64              `json:"minIOPS"`
+	MaxIOPS   int64              `json:"maxIOPS"`
+	BurstIOPS int64              `json:"burstIOPS"`
+	BurstTime int64              `json:"burstTime"`
+	Curve     map[string]float64 `json:"curve"`
 }
 
 type VolumeStats struct {

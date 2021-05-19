@@ -1,15 +1,13 @@
 package api
 
 import (
-	"bytes"
+	"context"
 	"crypto/tls"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"strings"
 
+	"github.com/go-resty/resty/v2"
+	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -22,6 +20,7 @@ type Client struct {
 	Version      string
 	ApiUrl       string
 	Name         string
+	RestyClient  *resty.Client
 }
 
 type Credentials struct {
@@ -29,50 +28,21 @@ type Credentials struct {
 	password string
 }
 
-type APIError struct {
-	Id    int `json:"id"`
-	Error struct {
-		Code    int    `json:"code"`
-		Message string `json:"message"`
-		Name    string `json:"name"`
-	} `json:"error"`
+type SFResponse struct {
+	Id     int32                  `json:"id"`
+	Result map[string]interface{} `json:"result"`
+	Error  SFAPIError             `json:"error"`
 }
 
-/*
+type SFAPIError struct {
+	Code    int32  `json:"code"`
+	Message string `json:"message"`
+	Name    string `json:"name"`
+}
 
-   func Create(target string, username string, password string, version string, port int, timeoutSecs int) (c *Client, err error) {
-	client, err := NewFromOpts(target, username, password, ver, port, timeoutSecs)
-	if err != nil {
-		log.Errorf("Err: %v", err)
-		return nil, err
-	}
-
-	// set to current version
-	getApiResult, err := client.GetAPI()
-	if err != nil {
-		log.Errorf("Error retrieving Cluster version: %v", err)
-		return nil, err
-	}
-	client.Version = strconv.FormatFloat(getApiResult.CurrentVersion, 'f', 1, 64)
-
-	if client.Port == 443 {
-		getClusterInfoResult, err := client.GetClusterInfo()
-		if err != nil {
-			log.Errorf("Error retrieving Cluster name: %v", err)
-			return nil, err
-		}
-		client.Name = getClusterInfoResult.ClusterInfo.Name
-	} else if client.Port == 442 {
-		getConfigResult, err := client.GetConfig()
-		if err != nil {
-			log.Errorf("Error retrieving Node name: %v", err)
-			return nil, err
-		}
-		client.Name = getConfigResult.Config.Cluster.Name
-	}
-	return client, err
-    }
-*/
+func (e *SFAPIError) Error() string {
+	return fmt.Sprintf("%s : %s - %s", string(e.Code), e.Name, e.Message)
+}
 
 func BuildClient(target string, username string, password string, version string, port int, timeoutSecs int) (c *Client, err error) {
 	// sanity check inputs
@@ -97,75 +67,42 @@ func BuildClient(target string, username string, password string, version string
 	}
 	creds := Credentials{username: username, password: password}
 	apiUrl := fmt.Sprintf("https://%s:%d/json-rpc/%s", target, port, version)
+	r := resty.New().
+		SetHeader("Accept", "application/json").
+		SetBasicAuth(creds.username, creds.password).
+		SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+
 	SFClient := &Client{
 		target:      target,
 		ApiUrl:      apiUrl,
 		credentials: creds,
 		Version:     version,
 		Port:        port,
+		RestyClient: r,
 		Timeout:     timeoutSecs}
 	return SFClient, nil
 }
 
-func (c *Client) SendRequest(method string, params interface{}) (response map[string]interface{}, err error) {
-	// increment the request counter
-	c.RequestCount++
-
-	// create the request json
-	data, err := json.Marshal(map[string]interface{}{
-		"method": method,
-		"id":     c.RequestCount,
-		"params": params,
-	})
-
-	// create the http client with proper settings
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true},
-		},
-	}
-
-	// make the request
-	req, err := http.NewRequest("POST", c.ApiUrl, strings.NewReader(string(data)))
-	req.SetBasicAuth(c.credentials.username, c.credentials.password)
-	log.Debugf("Request: %+v", string(data))
-	resp, err := client.Do(req)
+func (c *Client) request(ctx context.Context, method string, params interface{}, result interface{}) (err error) {
+	sfr := SFResponse{}
+	_, err = c.RestyClient.R().
+		SetBody(map[string]interface{}{
+			// TODO: Investigate replacing id w/ something concurrency safe
+			"id":     c.RequestCount,
+			"method": method,
+			"params": params,
+		}).
+		SetResult(&sfr).
+		Post(c.ApiUrl)
 	if err != nil {
-		log.Errorf("Error encountered posting request: %v", err)
-		return nil, err
+		log.Errorf("Error: %v", err)
+		return err
 	}
-
-	// read the response into a byte array
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	log.Debugf("Response: %+v", string(body))
-	if err != nil {
-		log.Errorf("Error reading response body: %v", err)
-		return nil, err
+	if sfr.Error.Code != 0 {
+		return errors.New(sfr.Error.Error())
 	}
-
-	// decode the response into a map
-	r := bytes.NewReader(body)
-	var result map[string]interface{}
-	err = json.NewDecoder(r).Decode(&result)
-	if err != nil {
-		log.Errorf("Error decoding response into map: %v", err)
-		return nil, err
+	if err = mapstructure.Decode(sfr.Result, &result); err != nil {
+		return err
 	}
-
-	// check for errors
-	errresp := APIError{}
-	err = json.Unmarshal([]byte(body), &errresp)
-	if err != nil {
-		log.Errorf("Error unmarshalling response: %v", err)
-		return nil, err
-	}
-	if errresp.Error.Code != 0 {
-		err = errors.New("Received error response from API request: " + errresp.Error.Message)
-		return nil, err
-	}
-
-	// return successful response
-	return result, nil
+	return nil
 }
