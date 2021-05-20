@@ -40,7 +40,7 @@ type SFAPIError struct {
 }
 
 func (e *SFAPIError) Error() string {
-	return fmt.Sprintf("%s : %s - %s", string(e.Code), e.Name, e.Message)
+	return fmt.Sprintf("%d : %s - %s", e.Code, e.Name, e.Message)
 }
 
 func BuildClient(target string, username string, password string, version string, port int, timeoutSecs int) (c *Client, err error) {
