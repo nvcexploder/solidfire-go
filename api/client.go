@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
-	log "github.com/sirupsen/logrus"
 )
 
 type Client struct {
@@ -47,12 +46,10 @@ func (e *SFAPIError) Error() string {
 func BuildClient(target string, username string, password string, version string, port int, timeoutSecs int) (c *Client, err error) {
 	// sanity check inputs
 	if target == "" {
-		log.Error("Target is not set, unable to issue requests")
 		err = errors.New("Unable to issue json-rpc requests without specifying Target")
 		return nil, err
 	}
 	if username == "" || password == "" {
-		log.Error("Credentials are not set, unable to issue requests")
 		err = errors.New("Unable to issue json-rpc requests without specifying Credentials")
 		return nil, err
 	}
@@ -95,7 +92,6 @@ func (c *Client) request(ctx context.Context, method string, params interface{},
 		SetResult(&sfr).
 		Post(c.ApiUrl)
 	if err != nil {
-		log.Errorf("Error: %v", err)
 		return err
 	}
 	if sfr.Error.Code != 0 {
