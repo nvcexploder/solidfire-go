@@ -131,12 +131,15 @@ type CreateScheduleRequest struct {
 }
 
 type CreateSnapshotRequest struct {
-	VolumeID                int64       `json:"volumeID"`
-	SnapshotID              int64       `json:"snapshotID,omitempty"`
-	Name                    string      `json:"name,omitempty"`
-	EnableRemoteReplication bool        `json:"enableRemoteReplication,omitempty"`
-	Retention               string      `json:"retention,omitempty"`
 	Attributes              interface{} `json:"attributes,omitempty"`
+	EnableRemoteReplication bool        `json:"enableRemoteReplication,omitempty"`
+	EnsureSerialCreate      bool        `json:"enableSerialCreation,omitempty"`
+	ExpirationTime          string      `json:"expirationTime,omitempty"`
+	Name                    string      `json:"name,omitempty"`
+	Retention               string      `json:"retention,omitempty"`
+	SnapMirrorLabel         string      `json:"snapMirrorLabel,omitempty"`
+	SnapshotID              int64       `json:"snapshotID,omitempty"`
+	VolumeID                int64       `json:"volumeID"`
 }
 
 type CreateStorageContainerRequest struct {
@@ -501,6 +504,8 @@ type ModifySnapshotRequest struct {
 	SnapshotID              int64  `json:"snapshotID"`
 	ExpirationTime          string `json:"expirationTime,omitempty"`
 	EnableRemoteReplication bool   `json:"enableRemoteReplication,omitempty"`
+	Name                    string `json:"name,omitempty"`
+	SnapMirrorLabel         string `json:"snapMirrorLabel,omitempty"`
 }
 
 type ModifyStorageContainerRequest struct {

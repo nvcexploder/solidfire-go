@@ -71,9 +71,9 @@ type CreateScheduleResult struct {
 }
 
 type CreateSnapshotResult struct {
-	Snapshot   Snapshot `json:"snapshot"`
+	Snapshot   Snapshot `json:"-"`
 	SnapshotID int64    `json:"snapshotID"`
-	Checksum   string   `json:"checksum"`
+	Checksum   string   `json:"-"`
 }
 
 type CreateStorageContainerResult struct {
@@ -93,8 +93,8 @@ type CreateVolumeAccessGroupResult struct {
 
 type CreateVolumeResult struct {
 	Volume   Volume             `json:"volume,omitempty"`
-	VolumeID int64              `json:"volumeID"`
-	Curve    map[string]float64 `json:"curve"`
+	VolumeID int64              `json:"-"`
+	Curve    map[string]float64 `json:"-"`
 }
 
 type DeleteAllSupportBundlesResult struct {
