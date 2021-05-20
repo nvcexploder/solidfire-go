@@ -7,8 +7,10 @@ import (
 	"github.com/joyent/solidfire-sdk/types"
 )
 
-func (c *Client) CreateVolume(ctx context.Context, req types.CreateVolumeRequest) (result *types.CreateVolumeResult, err error) {
-	err = c.request(ctx, "CreateVolume", req, &result)
+func (c *Client) CreateVolume(ctx context.Context, req types.CreateVolumeRequest) (result *types.Volume, err error) {
+	cvr := types.CreateVolumeResult{}
+	err = c.request(ctx, "CreateVolume", req, &cvr)
+	result = &cvr.Volume
 	return result, err
 }
 

@@ -92,9 +92,9 @@ type CreateVolumeAccessGroupResult struct {
 }
 
 type CreateVolumeResult struct {
-	Volume   Volume `json:"volume,omitempty"`
-	VolumeID int64  `json:"volumeID"`
-	Curve    int64  `json:"curve"`
+	Volume   Volume             `json:"volume,omitempty"`
+	VolumeID int64              `json:"volumeID"`
+	Curve    map[string]float64 `json:"curve"`
 }
 
 type DeleteAllSupportBundlesResult struct {
