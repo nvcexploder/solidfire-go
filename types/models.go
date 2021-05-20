@@ -9,13 +9,14 @@ type CHAPSecret struct {
 
 type Account struct {
 	AccountID          int64       `json:"accountID"`
+	Attributes         interface{} `json:"attributes,omitempty"`
+	EnableCHAP         bool        `json:"enableChap,omitempty"`
+	InitiatorSecret    string      `json:"initiatorSecret,omitempty"`
 	Username           string      `json:"username"`
 	Status             string      `json:"status"`
 	Volumes            []int64     `json:"volumes"`
-	InitiatorSecret    CHAPSecret  `json:"initiatorSecret,omitempty"`
-	TargetSecret       CHAPSecret  `json:"targetSecret,omitempty"`
+	TargetSecret       string      `json:"targetSecret,omitempty"`
 	StorageContainerID string      `json:"storageContainerID,omitempty"`
-	Attributes         interface{} `json:"attributes,omitempty"`
 }
 
 type AddedNode struct {
