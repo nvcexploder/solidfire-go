@@ -162,12 +162,18 @@ type CreateVolumeAccessGroupRequest struct {
 }
 
 type CreateVolumeRequest struct {
-	Name       string      `json:"name"`
-	AccountID  int64       `json:"accountID"`
-	TotalSize  int64       `json:"totalSize"`
-	Enable512e bool        `json:"enable512e"`
-	Qos        QoS         `json:"qos,omitempty"`
-	Attributes interface{} `json:"attributes,omitempty"`
+	Name                        string      `json:"name"`
+	AccountID                   int64       `json:"accountID"`
+	TotalSize                   int64       `json:"totalSize"`
+	Enable512e                  bool        `json:"enable512e"`
+	Qos                         QoS         `json:"qos,omitempty"`
+	QosPolicyID                 int64       `json:"qosPolicyID,omitempty"`
+	Access                      string      `json:"access,omitempty"`
+	AssociateWithQoSPolicy      bool        `json:"associateWithQosPolicy,omitempty"`
+	EnableSnapMirrorReplication bool        `json:"enableSnapMirrorReplication,omitempty"`
+	FifoSize                    int64       `json:"fifoSize,omitempty"`
+	MinFifoSize                 int64       `json:"minFifoSize,omitempty"`
+	Attributes                  interface{} `json:"attributes,omitempty"`
 }
 
 type DeleteGroupSnapshotRequest struct {
@@ -539,12 +545,20 @@ type ModifyVolumePairRequest struct {
 }
 
 type ModifyVolumeRequest struct {
-	VolumeID   int64       `json:"volumeID"`
-	AccountID  int64       `json:"accountID,omitempty"`
-	Access     string      `json:"access,omitempty"`
-	Qos        QoS         `json:"qos,omitempty"`
-	TotalSize  int64       `json:"totalSize,omitempty"`
-	Attributes interface{} `json:"attributes,omitempty"`
+	VolumeID                    int64       `json:"volumeID"`
+	AccountID                   int64       `json:"accountID,omitempty"`
+	Access                      string      `json:"access,omitempty"`
+	Qos                         QoS         `json:"qos,omitempty"`
+	QosPolicyID                 int64       `json:"qosPolicyID,omitempty"`
+	FifoSize                    int64       `json:"fifoSize,omitempty"`
+	MinFifoSize                 int64       `json:"minFifoSize,omitempty"`
+	TotalSize                   int64       `json:"totalSize,omitempty"`
+	Attributes                  interface{} `json:"attributes,omitempty"`
+	AssociateWithQoSPolicy      bool        `json:"associateWithQosPolicy,omitempty"`
+	CreateTime                  string      `json:"createTime,omitempty"`
+	EnableSnapMirrorReplication bool        `json:"enableSnapMirrorReplication,omitempty"`
+	Mode                        string      `json:"mode,omitempty"`
+	SetCreateTime               bool        `json:"setCreateTime,omitempty"`
 }
 
 type ModifyVolumesRequest struct {
