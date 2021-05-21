@@ -11,15 +11,14 @@ import (
 )
 
 type Client struct {
-	target       string
+	Target       string
 	Port         int
 	RequestCount int64
-	credentials  Credentials
 	Timeout      int
 	Version      string
 	ApiUrl       string
 	Name         string
-	RestyClient  *resty.Client
+	HTTPClient   *resty.Client
 }
 
 type Credentials struct {
@@ -46,11 +45,11 @@ func (e *SFAPIError) Error() string {
 func BuildClient(target string, username string, password string, version string, port int, timeoutSecs int) (c *Client, err error) {
 	// sanity check inputs
 	if target == "" {
-		err = errors.New("Unable to issue json-rpc requests without specifying Target")
+		err = errors.New("Client requires a valid target")
 		return nil, err
 	}
 	if username == "" || password == "" {
-		err = errors.New("Unable to issue json-rpc requests without specifying Credentials")
+		err = errors.New("Client requires a valid username and password")
 		return nil, err
 	}
 	if port == 0 {
@@ -70,27 +69,26 @@ func BuildClient(target string, username string, password string, version string
 		SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 
 	SFClient := &Client{
-		target:      target,
-		ApiUrl:      apiUrl,
-		credentials: creds,
-		Version:     version,
-		Port:        port,
-		RestyClient: r,
-		Timeout:     timeoutSecs}
+		Target:     target,
+		ApiUrl:     apiUrl,
+		Version:    version,
+		Port:       port,
+		HTTPClient: r,
+		Timeout:    timeoutSecs}
 	return SFClient, nil
 }
 
 func (c *Client) request(ctx context.Context, method string, params interface{}, result interface{}) (err error) {
 	sfr := SFResponse{}
-	_, err = c.RestyClient.R().
+	_, err = c.HTTPClient.R().
 		SetBody(map[string]interface{}{
-			// TODO: Investigate replacing id w/ something concurrency safe
 			"id":     c.RequestCount,
 			"method": method,
 			"params": params,
 		}).
 		SetResult(&sfr).
 		Post(c.ApiUrl)
+	c.RequestCount++
 	if err != nil {
 		return err
 	}
