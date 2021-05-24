@@ -1,12 +1,9 @@
-package api_test
+package api
 
 import (
 	"context"
-	"net/http"
 	"testing"
 
-	"github.com/jarcoal/httpmock"
-	"github.com/joyent/solidfire-sdk/api"
 	"github.com/joyent/solidfire-sdk/types"
 	"github.com/stretchr/testify/require"
 )
@@ -48,45 +45,6 @@ var testVolume = map[string]interface{}{
 	"totalSize":          1500000000,
 	"blockSize":          4096,
 	"attributes":         map[string]interface{}{},
-}
-
-func getTestClient(t *testing.T) (client *api.Client) {
-	var (
-		defaultTarget   = "localhost"
-		defaultUsername = "test-username"
-		defaultPassword = "supersecret"
-		defaultVersion  = "12.3"
-		defaultPort     = 443
-		defaultTimeout  = 10
-	)
-	client, err := api.BuildClient(defaultTarget, defaultUsername, defaultPassword, defaultVersion, defaultPort, defaultTimeout)
-	if err != nil {
-		require.Fail(t, "Failed to build test client", err)
-	}
-	return client
-}
-
-func activateMock(t *testing.T, c *api.Client, respBody interface{}) (mockReset func()) {
-	httpmock.ActivateNonDefault(c.HTTPClient.GetClient())
-	mockReset = func() {
-		httpmock.DeactivateAndReset()
-	}
-
-	responder, err := httpmock.NewJsonResponder(http.StatusOK, respBody)
-	if err != nil {
-		require.Fail(t, "Failed to Mock response with ", respBody, err)
-	}
-	httpmock.RegisterResponder("POST", c.ApiUrl, responder)
-	return mockReset
-
-}
-
-func buildSFResponseWrapper(resultValue map[string]interface{}) (response api.SFResponse) {
-	response = api.SFResponse{
-		Id:     1,
-		Result: resultValue,
-	}
-	return response
 }
 
 func TestCreateVolume(t *testing.T) {
