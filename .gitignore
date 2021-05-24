@@ -10,8 +10,17 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+.data-*
+.idea
+report.xml
+test.out
+test.xml
+test.html
+cover.out
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
 bin
+
+
