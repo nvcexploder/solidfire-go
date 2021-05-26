@@ -19,11 +19,11 @@ var (
 func TestBuldClientErrors(t *testing.T) {
 	var err error
 	_, err = BuildClient("", defaultUsername, defaultPassword, defaultVersion, defaultPort, defaultTimeout)
-	require.Equal(t, err.Error(), "Client requires a valid target")
+	require.Equal(t, err.Error(), ErrNoTarget)
 	_, err = BuildClient(defaultTarget, "", defaultPassword, defaultVersion, defaultPort, defaultTimeout)
-	require.Equal(t, err.Error(), "Client requires a valid username and password")
+	require.Equal(t, err.Error(), ErrNoCredentials)
 	_, err = BuildClient(defaultTarget, defaultUsername, "", defaultVersion, defaultPort, defaultTimeout)
-	require.Equal(t, err.Error(), "Client requires a valid username and password")
+	require.Equal(t, err.Error(), ErrNoCredentials)
 }
 
 func TestBuldClient(t *testing.T) {

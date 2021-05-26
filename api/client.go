@@ -42,14 +42,19 @@ func (e *SFAPIError) Error() string {
 	return fmt.Sprintf("%d : %s - %s", e.Code, e.Name, e.Message)
 }
 
+const (
+	ErrNoTarget      = "Client requires a valid target"
+	ErrNoCredentials = "Client requires a valid username and password"
+)
+
 func BuildClient(target string, username string, password string, version string, port int, timeoutSecs int) (c *Client, err error) {
 	// sanity check inputs
 	if target == "" {
-		err = errors.New("Client requires a valid target")
+		err = errors.New(ErrNoTarget)
 		return nil, err
 	}
 	if username == "" || password == "" {
-		err = errors.New("Client requires a valid username and password")
+		err = errors.New(ErrNoCredentials)
 		return nil, err
 	}
 	if port == 0 {
