@@ -3,7 +3,7 @@ TAG := $(shell git describe --tags | sed s/v//g)
 TIMESTAMP := $(shell date '+%FT%T%z')
 VERSION_PKG := github.com/cloud-pi/spc-sdk-go/pkg/common/version
 GOLDFLAGS := -X ${VERSION_PKG}.Timestamp=${TIMESTAMP} -X ${VERSION_PKG}.Commit=${COMMIT} -X ${VERSION_PKG}.Tag=${TAG}
-GOBUILDPKGS := ./api ./ ./types
+GOBUILDPKGS := ./types ./api ./examples
 GOPRIVATE := GOPRIVATE=github.com/joyent,github.com/cloud-pi
 GOLANG := 1.16
 LINTER_VERSION := 1.38.0
@@ -22,12 +22,10 @@ PREPARE_CMD := ${RSAKEY_COPY}; ${GITCONFIG_JOYENT};
 
 all: check build
 
-build: build-main
-
-build-main:
+build:
 	@GO111MODULE=on CGO_ENABLED=0 go build $(GCFLAGS) \
 		-ldflags "-X ${VERSION_PKG}.Application=${PROJECT_NAME} ${GOLDFLAGS}" \
-		-o ./bin/main ./
+		-o ./bin/example ./examples
 
 check:
 	test -z "$(shell gofmt -l internal cmd)"
