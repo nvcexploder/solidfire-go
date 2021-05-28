@@ -1,4 +1,4 @@
-package types
+package api
 
 type AddAccountResult struct {
 	AccountID int64   `json:"accountID"`

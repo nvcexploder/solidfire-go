@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/joyent/solidfire-sdk/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -39,8 +38,8 @@ var testVolume = map[string]interface{}{
 			"8192":    160,
 		},
 	},
-	"volumeAccessGroups": []types.VolumeAccessGroup{},
-	"volumePairs":        []types.VolumePair{},
+	"volumeAccessGroups": []VolumeAccessGroup{},
+	"volumePairs":        []VolumePair{},
 	"sliceCount":         1,
 	"totalSize":          1500000000,
 	"blockSize":          4096,
@@ -55,7 +54,7 @@ func TestCreateVolume(t *testing.T) {
 
 	ctx := context.Background()
 	var totalSize int64 = 1500000000
-	req := types.CreateVolumeRequest{
+	req := CreateVolumeRequest{
 		Name:       "solidfire-sdk-test",
 		AccountID:  testAccountId,
 		TotalSize:  totalSize,
@@ -105,7 +104,7 @@ func TestModifyVolume(t *testing.T) {
 	defer mockReset()
 
 	ctx := context.Background()
-	req := types.ModifyVolumeRequest{
+	req := ModifyVolumeRequest{
 		TotalSize: newTotalSize,
 	}
 	resp, err := c.ModifyVolume(ctx, req)
@@ -122,7 +121,7 @@ func TestListVolumes(t *testing.T) {
 	defer mockReset()
 
 	ctx := context.Background()
-	req := types.ListVolumesRequest{}
+	req := ListVolumesRequest{}
 	resp, err := c.ListVolumes(ctx, req)
 	require.Nil(t, err)
 	require.Equal(t, testVolumeId, resp[0].VolumeID)

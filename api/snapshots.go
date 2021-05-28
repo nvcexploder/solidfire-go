@@ -3,44 +3,42 @@ package api
 import (
 	"context"
 	"errors"
-
-	"github.com/joyent/solidfire-sdk/types"
 )
 
 const (
 	ErrNoSnapshotFound = "No snapshot found with the given id"
 )
 
-func (c *Client) CreateSnapshot(ctx context.Context, req types.CreateSnapshotRequest) (result *types.Snapshot, err error) {
-	csr := types.CreateSnapshotResult{}
+func (c *Client) CreateSnapshot(ctx context.Context, req CreateSnapshotRequest) (result *Snapshot, err error) {
+	csr := CreateSnapshotResult{}
 	err = c.request(ctx, "CreateSnapshot", req, &csr)
 	result = &csr.Snapshot
 	return result, err
 }
 
-func (c *Client) ModifySnapshot(ctx context.Context, req types.ModifySnapshotRequest) (result *types.Snapshot, err error) {
-	msr := types.ModifySnapshotResult{}
+func (c *Client) ModifySnapshot(ctx context.Context, req ModifySnapshotRequest) (result *Snapshot, err error) {
+	msr := ModifySnapshotResult{}
 	err = c.request(ctx, "ModifySnapshot", req, &msr)
 	result = &msr.Snapshot
 	return result, err
 }
 
 func (c *Client) DeleteSnapshot(ctx context.Context, id int64) error {
-	req := types.DeleteSnapshotRequest{
+	req := DeleteSnapshotRequest{
 		SnapshotID: id,
 	}
 	return c.request(ctx, "DeleteSnapshot", req, nil)
 }
 
-func (c *Client) ListSnapshots(ctx context.Context, req types.ListSnapshotsRequest) (result []types.Snapshot, err error) {
-	lsr := types.ListSnapshotsResult{}
+func (c *Client) ListSnapshots(ctx context.Context, req ListSnapshotsRequest) (result []Snapshot, err error) {
+	lsr := ListSnapshotsResult{}
 	err = c.request(ctx, "ListSnapshots", req, &lsr)
 	result = lsr.Snapshots
 	return result, err
 }
 
-func (c *Client) GetSnapshotById(ctx context.Context, id int64) (result *types.Snapshot, err error) {
-	req := types.ListSnapshotsRequest{
+func (c *Client) GetSnapshotById(ctx context.Context, id int64) (result *Snapshot, err error) {
+	req := ListSnapshotsRequest{
 		SnapshotID: id,
 	}
 	resp, err := c.ListSnapshots(ctx, req)
@@ -52,8 +50,8 @@ func (c *Client) GetSnapshotById(ctx context.Context, id int64) (result *types.S
 	return result, err
 }
 
-func (c *Client) GetSnapshotsByVolumeId(ctx context.Context, id int64) (result []types.Snapshot, err error) {
-	req := types.ListSnapshotsRequest{
+func (c *Client) GetSnapshotsByVolumeId(ctx context.Context, id int64) (result []Snapshot, err error) {
+	req := ListSnapshotsRequest{
 		VolumeID: id,
 	}
 	return c.ListSnapshots(ctx, req)
