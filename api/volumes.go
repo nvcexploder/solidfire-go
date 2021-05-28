@@ -2,9 +2,13 @@ package api
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"github.com/joyent/solidfire-sdk/types"
+)
+
+const (
+	ErrNoVolumeFound = "No volume found with the given id"
 )
 
 func (c *Client) CreateVolume(ctx context.Context, req types.CreateVolumeRequest) (result *types.Volume, err error) {
@@ -47,7 +51,7 @@ func (c *Client) GetVolumeById(ctx context.Context, id int64) (result *types.Vol
 	if len(lvr.Volumes) > 0 {
 		result = &lvr.Volumes[0]
 	} else if err == nil {
-		err = fmt.Errorf("No volume found with the given id: %d", id)
+		err = errors.New(ErrNoVolumeFound)
 	}
 	return result, err
 }

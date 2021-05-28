@@ -2,9 +2,13 @@ package api
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"github.com/joyent/solidfire-sdk/types"
+)
+
+const (
+	ErrNoSnapshotFound = "No snapshot found with the given id"
 )
 
 func (c *Client) CreateSnapshot(ctx context.Context, req types.CreateSnapshotRequest) (result *types.Snapshot, err error) {
@@ -43,7 +47,7 @@ func (c *Client) GetSnapshotById(ctx context.Context, id int64) (result *types.S
 	if len(resp) > 0 {
 		result = &resp[0]
 	} else if err == nil {
-		err = fmt.Errorf("No snapshot found with the given id: %d", id)
+		err = errors.New(ErrNoSnapshotFound)
 	}
 	return result, err
 }
