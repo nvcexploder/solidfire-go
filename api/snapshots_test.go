@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/joyent/solidfire-sdk/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -35,7 +34,7 @@ func TestCreateSnapshot(t *testing.T) {
 	defer mockReset()
 
 	ctx := context.Background()
-	req := types.CreateSnapshotRequest{
+	req := CreateSnapshotRequest{
 		VolumeID: testSnapshotVolumeId,
 		Name:     testSnapshotName,
 	}
@@ -60,7 +59,7 @@ func TestModifySnapshot(t *testing.T) {
 	defer mockReset()
 
 	ctx := context.Background()
-	req := types.ModifySnapshotRequest{
+	req := ModifySnapshotRequest{
 		SnapshotID: testSnapshotId,
 		Name:       snapshotName,
 	}
@@ -87,7 +86,7 @@ func TestListSnapshots(t *testing.T) {
 	mockReset := activateMock(t, c, mockResp)
 	defer mockReset()
 	ctx := context.Background()
-	req := types.ListSnapshotsRequest{}
+	req := ListSnapshotsRequest{}
 	resp, err := c.ListSnapshots(ctx, req)
 	require.Nil(t, err)
 	require.True(t, (len(resp) > 0))

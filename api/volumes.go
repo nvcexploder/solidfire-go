@@ -3,50 +3,48 @@ package api
 import (
 	"context"
 	"errors"
-
-	"github.com/joyent/solidfire-sdk/types"
 )
 
 const (
 	ErrNoVolumeFound = "No volume found with the given id"
 )
 
-func (c *Client) CreateVolume(ctx context.Context, req types.CreateVolumeRequest) (result *types.Volume, err error) {
-	cvr := types.CreateVolumeResult{}
+func (c *Client) CreateVolume(ctx context.Context, req CreateVolumeRequest) (result *Volume, err error) {
+	cvr := CreateVolumeResult{}
 	err = c.request(ctx, "CreateVolume", req, &cvr)
 	result = &cvr.Volume
 	return result, err
 }
 
-func (c *Client) ModifyVolume(ctx context.Context, req types.ModifyVolumeRequest) (result *types.Volume, err error) {
-	mvr := types.ModifyVolumeResult{}
+func (c *Client) ModifyVolume(ctx context.Context, req ModifyVolumeRequest) (result *Volume, err error) {
+	mvr := ModifyVolumeResult{}
 	err = c.request(ctx, "ModifyVolume", req, &mvr)
 	result = &mvr.Volume
 	return result, err
 }
 
-func (c *Client) DeleteVolume(ctx context.Context, id int64) (result *types.Volume, err error) {
-	req := types.DeleteVolumeRequest{
+func (c *Client) DeleteVolume(ctx context.Context, id int64) (result *Volume, err error) {
+	req := DeleteVolumeRequest{
 		VolumeID: id,
 	}
-	dvr := types.DeleteVolumeResult{}
+	dvr := DeleteVolumeResult{}
 	err = c.request(ctx, "DeleteVolume", req, &dvr)
 	result = &dvr.Volume
 	return result, err
 }
 
-func (c *Client) ListVolumes(ctx context.Context, req types.ListVolumesRequest) (result []types.Volume, err error) {
-	lvr := types.ListVolumesResult{}
+func (c *Client) ListVolumes(ctx context.Context, req ListVolumesRequest) (result []Volume, err error) {
+	lvr := ListVolumesResult{}
 	err = c.request(ctx, "ListVolumes", req, &lvr)
 	result = lvr.Volumes
 	return result, err
 }
 
-func (c *Client) GetVolumeById(ctx context.Context, id int64) (result *types.Volume, err error) {
-	req := types.ListVolumesRequest{
+func (c *Client) GetVolumeById(ctx context.Context, id int64) (result *Volume, err error) {
+	req := ListVolumesRequest{
 		VolumeIDs: []int64{id},
 	}
-	lvr := types.ListVolumesResult{}
+	lvr := ListVolumesResult{}
 	err = c.request(ctx, "ListVolumes", req, &lvr)
 	if len(lvr.Volumes) > 0 {
 		result = &lvr.Volumes[0]
@@ -56,11 +54,11 @@ func (c *Client) GetVolumeById(ctx context.Context, id int64) (result *types.Vol
 	return result, err
 }
 
-func (c *Client) ListVolumeStats(ctx context.Context, ids []int64) (result []types.VolumeStats, err error) {
-	req := types.ListVolumeStatsRequest{
+func (c *Client) ListVolumeStats(ctx context.Context, ids []int64) (result []VolumeStats, err error) {
+	req := ListVolumeStatsRequest{
 		VolumeIDs: ids,
 	}
-	lvsr := types.ListVolumeStatsResult{}
+	lvsr := ListVolumeStatsResult{}
 	err = c.request(ctx, "ListVolumeStats", req, &lvsr)
 	result = lvsr.VolumeStats
 	return result, err
