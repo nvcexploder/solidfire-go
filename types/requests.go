@@ -560,10 +560,8 @@ type ModifyVolumeRequest struct {
 	TotalSize                   int64       `json:"totalSize,omitempty"`
 	Attributes                  interface{} `json:"attributes,omitempty"`
 	AssociateWithQoSPolicy      bool        `json:"associateWithQosPolicy,omitempty"`
-	CreateTime                  string      `json:"createTime,omitempty"`
 	EnableSnapMirrorReplication bool        `json:"enableSnapMirrorReplication,omitempty"`
 	Mode                        string      `json:"mode,omitempty"`
-	SetCreateTime               bool        `json:"setCreateTime,omitempty"`
 }
 
 type ModifyVolumesRequest struct {

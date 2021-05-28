@@ -15,9 +15,6 @@ func (c *Client) CreateVolume(ctx context.Context, req types.CreateVolumeRequest
 }
 
 func (c *Client) ModifyVolume(ctx context.Context, req types.ModifyVolumeRequest) (result *types.Volume, err error) {
-	if req.CreateTime != "" {
-		req.SetCreateTime = true
-	}
 	mvr := types.ModifyVolumeResult{}
 	err = c.request(ctx, "ModifyVolume", req, &mvr)
 	result = &mvr.Volume
