@@ -737,6 +737,32 @@ type StartBulkVolumeReadRequest struct {
 	Attributes       interface{} `json:"attributes,omitempty"`
 }
 
+type BulkVolumeRange struct {
+	LBA   int64 `json:"lba"`
+	Range int64 `json:"range"`
+}
+
+type S3WriteParams struct {
+	AWSAccessKeyID     string `json:"awsAccessKeyId"`
+	AWSSecretAccessKey string `json:"awsSecretAccessKey"`
+	Bucket             string `json:"bucket"`
+	Prefix             string `json:"prefix"`
+	Endpoint           string `json:"endpoint"`
+	Format             string `json:"format"`
+	Hostname           string `json:"hostname"`
+}
+type S3ScriptParameters struct {
+	Range BulkVolumeRange `json:"range"`
+	Write S3WriteParams   `json:"write"`
+}
+
+type S3BackupRequest struct {
+	VolumeID   int64
+	SnapshotID int64
+	Range      BulkVolumeRange
+	Params     S3WriteParams
+}
+
 type StartBulkVolumeWriteRequest struct {
 	VolumeID         int64       `json:"volumeID"`
 	Format           string      `json:"format"`

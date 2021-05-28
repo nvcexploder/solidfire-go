@@ -1,5 +1,13 @@
 package api
 
+const (
+	BulkVolumeScript   = "bv_internal.py"
+	FormatNative       = "native"
+	FormatUncompressed = "uncompressed"
+	EndpointS3         = "s3"
+	EndpointSolidFire  = "solidfire"
+)
+
 type Frequency struct {
 }
 
