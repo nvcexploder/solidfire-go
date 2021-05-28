@@ -39,7 +39,7 @@ type SFAPIError struct {
 }
 
 func (e *SFAPIError) Error() string {
-	return fmt.Sprintf("%d : %s - %s", e.Code, e.Name, e.Message)
+	return fmt.Sprintf("%d : %s : %s", e.Code, e.Name, e.Message)
 }
 
 const (
