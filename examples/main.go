@@ -74,7 +74,7 @@ func main() {
 	username := os.Getenv("SOLIDFIRE_USER")
 	password := os.Getenv("SOLIDFIRE_PASS")
 	if host == "" || username == "" || password == "" {
-		fmt.Println("Environment variables SOLIDFIRE_HOST, SOLIDFIRE_USER, and SOLIDER_PASS must be set")
+		fmt.Println("Environment variables SOLIDFIRE_HOST, SOLIDFIRE_USER, and SOLIDFIRE_PASS must be set")
 		return
 	}
 

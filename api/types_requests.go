@@ -737,6 +737,72 @@ type StartBulkVolumeReadRequest struct {
 	Attributes       interface{} `json:"attributes,omitempty"`
 }
 
+type BulkVolumeRange struct {
+	LBA   int64 `json:"lba"`
+	Range int64 `json:"range"`
+}
+
+type S3Params struct {
+	AWSAccessKeyID     string `json:"awsAccessKeyId"`
+	AWSSecretAccessKey string `json:"awsSecretAccessKey"`
+	Bucket             string `json:"bucket"`
+	Prefix             string `json:"prefix"`
+	Format             string `json:"format"`
+	Hostname           string `json:"hostname"`
+}
+
+type s3Params struct {
+	S3Params
+	Endpoint string `json:"endpoint"`
+}
+
+type SolidFireParams struct {
+	ManagementVIP  string `json:"mvip"`
+	Username       string `json:"username"`
+	Password       string `json:"password"`
+	Format         string `json:"format"`
+	VolumeWriteKey string `json:"key"`
+}
+
+type solidFireParams struct {
+	SolidFireParams
+	Endpoint string `json:"endpoint"`
+}
+type S3WriteParameters struct {
+	Range BulkVolumeRange `json:"range"`
+	Write s3Params        `json:"write"`
+}
+
+type S3ReadParameters struct {
+	Range BulkVolumeRange `json:"range"`
+	Read  s3Params        `json:"read"`
+}
+
+type solidFireWriteParameters struct {
+	Range BulkVolumeRange `json:"range"`
+	Write solidFireParams `json:"write"`
+}
+
+type S3BackupRequest struct {
+	VolumeID   int64
+	SnapshotID int64
+	Range      BulkVolumeRange
+	Params     S3Params
+}
+
+type S3RestoreRequest struct {
+	VolumeID int64
+	Range    BulkVolumeRange
+	Params   S3Params
+}
+
+type SolidFireBackupRequest struct {
+	VolumeID   int64
+	SnapshotID int64
+	Range      BulkVolumeRange
+	Params     SolidFireParams
+}
+
 type StartBulkVolumeWriteRequest struct {
 	VolumeID         int64       `json:"volumeID"`
 	Format           string      `json:"format"`

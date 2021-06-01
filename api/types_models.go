@@ -1,5 +1,16 @@
 package api
 
+const (
+	BulkVolumeScript   = "bv_internal.py"
+	FormatNative       = "native"
+	FormatUncompressed = "uncompressed"
+	EndpointS3         = "s3"
+	EndpointSolidFire  = "solidfire"
+
+	Gibibytes = 1024 * 1024 * 1024
+	Gigabytes = 1000 * 1000 * 1000
+)
+
 type Frequency struct {
 }
 
@@ -38,14 +49,15 @@ type AddressBlock struct {
 	Available string `json:"available"`
 }
 
+type AsyncResultID int64
 type AsyncHandle struct {
-	AsyncResultID  int64       `json:"asyncResultID"`
-	Completed      bool        `json:"completed"`
-	CreateTime     string      `json:"createTime"`
-	LastUpdateTime string      `json:"lastUpdateTime"`
-	ResultType     string      `json:"resultType"`
-	Success        bool        `json:"success"`
-	Data           interface{} `json:"data"`
+	AsyncResultID  AsyncResultID `json:"asyncResultID"`
+	Completed      bool          `json:"completed"`
+	CreateTime     string        `json:"createTime"`
+	LastUpdateTime string        `json:"lastUpdateTime"`
+	ResultType     string        `json:"resultType"`
+	Success        bool          `json:"success"`
+	Data           interface{}   `json:"data"`
 }
 
 type BackupTarget struct {
