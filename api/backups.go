@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 )
 
 func (c *Client) StartBulkVolumeRead(ctx context.Context, r StartBulkVolumeReadRequest) (result StartBulkVolumeReadResult, err error) {
@@ -25,7 +24,10 @@ func (c *Client) StartRemoteS3Backup(ctx context.Context, r S3BackupRequest) (re
 		Script:     BulkVolumeScript,
 		ScriptParameters: S3WriteParameters{
 			Range: r.Range,
-			Write: r.Params,
+			Write: s3Params{
+				S3Params: r.Params,
+				Endpoint: EndpointS3,
+			},
 		},
 	}
 	bvresult, err := c.StartBulkVolumeRead(ctx, bvreq)
@@ -41,9 +43,12 @@ func (c *Client) StartRemoteSolidFireBackup(ctx context.Context, r SolidFireBack
 		SnapshotID: r.SnapshotID,
 		Format:     r.Params.Format,
 		Script:     BulkVolumeScript,
-		ScriptParameters: SolidFireWriteParameters{
+		ScriptParameters: solidFireWriteParameters{
 			Range: r.Range,
-			Write: r.Params,
+			Write: solidFireParams{
+				SolidFireParams: r.Params,
+				Endpoint:        EndpointSolidFire,
+			},
 		},
 	}
 	bvresult, err := c.StartBulkVolumeRead(ctx, bvreq)
@@ -71,7 +76,10 @@ func (c *Client) StartRemoteS3Restore(ctx context.Context, r S3RestoreRequest) (
 		Script:   BulkVolumeScript,
 		ScriptParameters: S3ReadParameters{
 			Range: r.Range,
-			Read:  r.Params,
+			Read: s3Params{
+				S3Params: r.Params,
+				Endpoint: EndpointS3,
+			},
 		},
 	}
 	bvresult, err := c.StartBulkVolumeWrite(ctx, bvreq)
@@ -79,13 +87,4 @@ func (c *Client) StartRemoteS3Restore(ctx context.Context, r S3RestoreRequest) (
 		return result, err
 	}
 	return AsyncResultID(bvresult.AsyncHandle), nil
-}
-
-func validateFormat(format string) error {
-	if format != FormatNative && format != FormatUncompressed {
-		// TODO: use error types
-		return fmt.Errorf("supported formats are '%s' and '%s'", FormatNative, FormatUncompressed)
-	}
-
-	return nil
 }

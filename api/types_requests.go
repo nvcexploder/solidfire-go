@@ -747,32 +747,40 @@ type S3Params struct {
 	AWSSecretAccessKey string `json:"awsSecretAccessKey"`
 	Bucket             string `json:"bucket"`
 	Prefix             string `json:"prefix"`
-	Endpoint           string `json:"endpoint"`
 	Format             string `json:"format"`
 	Hostname           string `json:"hostname"`
+}
+
+type s3Params struct {
+	S3Params
+	Endpoint string `json:"endpoint"`
 }
 
 type SolidFireParams struct {
 	ManagementVIP  string `json:"mvip"`
 	Username       string `json:"username"`
 	Password       string `json:"password"`
-	Endpoint       string `json:"endpoint"`
 	Format         string `json:"format"`
 	VolumeWriteKey string `json:"key"`
 }
+
+type solidFireParams struct {
+	SolidFireParams
+	Endpoint string `json:"endpoint"`
+}
 type S3WriteParameters struct {
 	Range BulkVolumeRange `json:"range"`
-	Write S3Params        `json:"write"`
+	Write s3Params        `json:"write"`
 }
 
 type S3ReadParameters struct {
 	Range BulkVolumeRange `json:"range"`
-	Read  S3Params        `json:"read"`
+	Read  s3Params        `json:"read"`
 }
 
-type SolidFireWriteParameters struct {
+type solidFireWriteParameters struct {
 	Range BulkVolumeRange `json:"range"`
-	Write SolidFireParams `json:"write"`
+	Write solidFireParams `json:"write"`
 }
 
 type S3BackupRequest struct {

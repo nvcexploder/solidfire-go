@@ -54,7 +54,6 @@ func Test_RemoteS3Backup(t *testing.T) {
 			AWSSecretAccessKey: "fake",
 			Bucket:             "fake",
 			Prefix:             "fake",
-			Endpoint:           api.EndpointS3,
 			Format:             api.FormatNative,
 			Hostname:           "fake",
 		},
@@ -78,7 +77,6 @@ func Test_StartRemoteSolidFireBackup(t *testing.T) {
 			ManagementVIP:  "fake",
 			Username:       "fake",
 			Password:       "fake",
-			Endpoint:       api.EndpointSolidFire,
 			Format:         api.FormatNative,
 			VolumeWriteKey: "fake",
 		},
@@ -90,7 +88,7 @@ func Test_StartRemoteSolidFireBackup(t *testing.T) {
 func Test_StartRemoteS3Restore(t *testing.T) {
 	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
 	subject := testClient(t)
-	subject.HTTPClient.Debug = true
+	// subject.HTTPClient.Debug = true
 	vol := identifyRestoreVolume(t, subject)
 	id, err := subject.StartRemoteS3Restore(context.Background(), api.S3RestoreRequest{
 		VolumeID: vol,
@@ -103,7 +101,6 @@ func Test_StartRemoteS3Restore(t *testing.T) {
 			AWSSecretAccessKey: "fake",
 			Bucket:             "fake",
 			Prefix:             "fake",
-			Endpoint:           api.EndpointS3,
 			Format:             api.FormatNative,
 			Hostname:           "fake",
 		},
@@ -134,7 +131,6 @@ func identifyBackupSnapshot(t *testing.T, c *api.Client) (volumeId, snapshotId i
 	return snaps[0].VolumeID, snaps[0].SnapshotID
 }
 
-// TODO: maybe use attributes to identify a volume marked as safe to use for testing?
 func identifyRestoreVolume(t *testing.T, c *api.Client) (volumeId int64) {
 	vols, err := c.ListVolumes(context.Background(), api.ListVolumesRequest{
 		Limit: 1,
