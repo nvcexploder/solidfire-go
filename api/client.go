@@ -3,11 +3,11 @@ package api
 import (
 	"context"
 	"crypto/tls"
-	"errors"
 	"fmt"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
 )
 
 type Client struct {
@@ -38,13 +38,54 @@ type SFAPIError struct {
 	Name    string `json:"name"`
 }
 
-func (e *SFAPIError) Error() string {
-	return fmt.Sprintf("%d : %s : %s", e.Code, e.Name, e.Message)
+type SFError interface {
+	GetName() string
+	GetMessage() string
 }
 
+type RequestError struct {
+	Message string `json:"message"`
+	Name    string `json:"name"`
+}
+
+func (e *RequestError) Error() string {
+	return fmt.Sprintf("%s : %s", e.GetName(), e.GetMessage())
+}
+func (e *RequestError) GetName() string    { return e.Name }
+func (e *RequestError) GetMessage() string { return e.Message }
+
+type ServiceError struct {
+	Message string `json:"message"`
+	Name    string `json:"name"`
+}
+
+func (e *ServiceError) Error() string {
+	return fmt.Sprintf("%s : %s", e.Name, e.Message)
+}
+func (e *ServiceError) GetName() string    { return e.Name }
+func (e *ServiceError) GetMessage() string { return e.Message }
+
+type ResourceNotFoundError struct {
+	Message string `json:"message"`
+	Name    string `json:"name"`
+}
+
+func (e *ResourceNotFoundError) Error() string {
+	return fmt.Sprintf("%s : %s", e.Name, e.Message)
+}
+func (e *ResourceNotFoundError) GetName() string    { return e.Name }
+func (e *ResourceNotFoundError) GetMessage() string { return e.Message }
+
 const (
-	ErrNoTarget      = "Client requires a valid target"
-	ErrNoCredentials = "Client requires a valid username and password"
+	ErrNoTarget               = "Client requires a valid target"
+	ErrNoCredentials          = "Client requires a valid username and password"
+	ErrVolumeIDDoesNotExist   = "xVolumeIDDoesNotExist"
+	ErrSnapshotIDDoesNotExist = "xSnapshotIDDoesNotExist"
+	ErrAccountIDDoesNotExist  = "xAccountIDDoesNotExist"
+	ErrQoSPolicyDoesNotExist  = "xQoSPolicyDoesNotExist"
+	ErrExceededLimit          = "xExceededLimit"
+	ErrUnrecognizedEnumString = "xUnrecognizedEnumString"
+	ErrInvalidAPIParameter    = "xInvalidAPIParameter"
 )
 
 func BuildClient(target string, username string, password string, version string, port int, timeoutSecs int) (c *Client, err error) {
@@ -98,7 +139,23 @@ func (c *Client) request(ctx context.Context, method string, params interface{},
 		return err
 	}
 	if sfr.Error.Code != 0 {
-		return errors.New(sfr.Error.Error())
+		switch sfr.Error.Name {
+		case ErrVolumeIDDoesNotExist, ErrSnapshotIDDoesNotExist, ErrAccountIDDoesNotExist, ErrQoSPolicyDoesNotExist:
+			return &ResourceNotFoundError{
+				Name:    sfr.Error.Name,
+				Message: sfr.Error.Message,
+			}
+		case ErrExceededLimit, ErrUnrecognizedEnumString, ErrInvalidAPIParameter:
+			return &RequestError{
+				Name:    sfr.Error.Name,
+				Message: sfr.Error.Message,
+			}
+		default:
+			return &ServiceError{
+				Name:    sfr.Error.Name,
+				Message: sfr.Error.Message,
+			}
+		}
 	}
 	if err = mapstructure.Decode(sfr.Result, &result); err != nil {
 		return err
