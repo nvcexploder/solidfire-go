@@ -79,6 +79,8 @@ func (e *ResourceNotFoundError) GetMessage() string { return e.Message }
 const (
 	ErrNoTarget               = "Client requires a valid target"
 	ErrNoCredentials          = "Client requires a valid username and password"
+	ErrInvalidCredentials     = "Provided credentials are invalid"
+	ErrUnexpectedServerError  = "Unexpected server error"
 	ErrVolumeIDDoesNotExist   = "xVolumeIDDoesNotExist"
 	ErrSnapshotIDDoesNotExist = "xSnapshotIDDoesNotExist"
 	ErrAccountIDDoesNotExist  = "xAccountIDDoesNotExist"
@@ -126,7 +128,7 @@ func BuildClient(target string, username string, password string, version string
 
 func (c *Client) request(ctx context.Context, method string, params interface{}, result interface{}) (err error) {
 	sfr := SFResponse{}
-	_, err = c.HTTPClient.R().
+	response, err := c.HTTPClient.R().
 		SetBody(map[string]interface{}{
 			"id":     c.RequestCount,
 			"method": method,
@@ -138,6 +140,30 @@ func (c *Client) request(ctx context.Context, method string, params interface{},
 	if err != nil {
 		return err
 	}
+
+	// resty documentation isn't explicit about this but it seems like `err` is for connection/transport
+	// errors and http protocol errors are provided in the *resty.Response.  Most of the time protocol
+	// errors won't be expected as those usually become json-rpc errors.  However, there are some edge
+	// cases where HTTP errors are expected and no json object is available
+	if response.IsError() {
+		// auth errors return a 401 and html instead of json
+		if response.StatusCode() == 401 {
+			return &RequestError{
+				Name:    ErrInvalidCredentials,
+				Message: response.Status(),
+			}
+		}
+		// making a bit of an assumption here that any other kind of http error will also not include
+		// json so we'll just return something generic.  Unfortunately, resty doesn't tell us if
+		// if the response wasn't able to be unmarshaled so our SFResponse would appear to have
+		// a 0 error code if we attempted to check the result object in the case where we got something
+		// other than the expected json schema.
+		return &ServiceError{
+			Name:    ErrUnexpectedServerError,
+			Message: response.Status(),
+		}
+	}
+
 	if sfr.Error.Code != 0 {
 		switch sfr.Error.Name {
 		case ErrVolumeIDDoesNotExist, ErrSnapshotIDDoesNotExist, ErrAccountIDDoesNotExist, ErrQoSPolicyDoesNotExist:

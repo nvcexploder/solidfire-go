@@ -26,16 +26,21 @@ func getTestClient(t *testing.T) (client *Client) {
 
 func activateMock(t *testing.T, c *Client, respBody interface{}) (mockReset func()) {
 	httpmock.ActivateNonDefault(c.HTTPClient.GetClient())
-	mockReset = func() {
-		httpmock.DeactivateAndReset()
-	}
 
 	responder, err := httpmock.NewJsonResponder(http.StatusOK, respBody)
 	if err != nil {
 		require.Fail(t, "Failed to Mock response with ", respBody, err)
 	}
 	httpmock.RegisterResponder("POST", c.ApiUrl, responder)
-	return mockReset
+	return httpmock.DeactivateAndReset
+}
+
+func activateMockHttpErr(c *Client, status int) (mockReset func()) {
+	httpmock.ActivateNonDefault(c.HTTPClient.GetClient())
+
+	responder := httpmock.NewStringResponder(status, "not json")
+	httpmock.RegisterResponder("POST", c.ApiUrl, responder)
+	return httpmock.DeactivateAndReset
 }
 
 func buildSFResponseWrapper(resultValue map[string]interface{}) (response SFResponse) {
