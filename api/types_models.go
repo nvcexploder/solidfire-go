@@ -225,6 +225,11 @@ type CreateInitiator struct {
 	Alias               string      `json:"alias,omitempty"`
 	VolumeAccessGroupID int64       `json:"volumeAccessGroupID,omitempty"`
 	Attributes          interface{} `json:"attributes,omitempty"`
+	ChapUsername        string      `json:"chapUsername,omitempty"`
+	InitiatorSecret     string      `json:"initiatorSecret,omitempty"`
+	RequireChap         bool        `json:"requireChap,omitempty"`
+	TargetSecret        string      `json:"targetSecret,omitempty"`
+	VirtualNetworkIDs   []int64     `json:"virtualNetworkIDs,omitempty"`
 }
 
 type DetailedService struct {
@@ -488,6 +493,11 @@ type Initiator struct {
 	InitiatorName      string      `json:"initiatorName"`
 	VolumeAccessGroups []int64     `json:"volumeAccessGroups"`
 	Attributes         interface{} `json:"attributes"`
+	ChapUsername       string      `json:"chapUsername,omitempty"`
+	InitiatorSecret    string      `json:"initiatorSecret,omitempty"`
+	RequireChap        bool        `json:"requireChap,omitempty"`
+	TargetSecret       string      `json:"targetSecret,omitempty"`
+	VirtualNetworkIDs  []int64     `json:"virtualNetworkIDs,omitempty"`
 }
 
 type IpmiInfo struct {
@@ -532,6 +542,12 @@ type ModifyInitiator struct {
 	Alias               string      `json:"alias,omitempty"`
 	VolumeAccessGroupID int64       `json:"volumeAccessGroupID,omitempty"`
 	Attributes          interface{} `json:"attributes,omitempty"`
+	ForceDuringUpgrade  bool        `json:"forceDuringUpgrade,omitempty"`
+	ChapUsername        string      `json:"chapUsername,omitempty"`
+	InitiatorSecret     string      `json:"initiatorSecret,omitempty"`
+	RequireChap         bool        `json:"requireChap,omitempty"`
+	TargetSecret        string      `json:"targetSecret,omitempty"`
+	VirtualNetworkIDs   []int64     `json:"virtualNetworkIDs,omitempty"`
 }
 
 type Network struct {
