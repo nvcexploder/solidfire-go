@@ -854,3 +854,12 @@ type UpdateBulkVolumeStatusRequest struct {
 	Message         string      `json:"message,omitempty"`
 	Attributes      interface{} `json:"attributes,omitempty"`
 }
+
+type ListAsyncTaskRequest struct {
+	AsyncResultTypes []string `json:"asyncResultTypes,omitempty"`
+}
+
+type GetAsyncTaskRequest struct {
+	AsyncHandle AsyncResultID `json:"asyncHandle"`
+	KeepResult  bool          `json:"keepResult,omitempty"`
+}
