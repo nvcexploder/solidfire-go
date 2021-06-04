@@ -88,3 +88,27 @@ func (c *Client) StartRemoteS3Restore(ctx context.Context, r S3RestoreRequest) (
 	}
 	return AsyncResultID(bvresult.AsyncHandle), nil
 }
+
+func (c *Client) ListAllAsyncTasks(ctx context.Context, r ListAsyncResultsRequest) (results ListAsyncResultsResult, err error) {
+	err = c.request(ctx, "ListAsyncResults", r, &results)
+	if err != nil {
+		return ListAsyncResultsResult{}, err
+	}
+	return results, nil
+}
+
+func (c *Client) GetAsyncTask(ctx context.Context, r GetAsyncResultRequest) (result GetAsyncResult, err error) {
+	err = c.request(ctx, "GetAsyncResult", r, &result)
+	if err != nil {
+		return GetAsyncResult{}, err
+	}
+	return result, nil
+}
+
+func (c *Client) GetEventList(ctx context.Context, r ListEventsRequest) (result ListEventsResult, err error) {
+	err = c.request(ctx, "ListEvents", r, &result)
+	if err != nil {
+		return ListEventsResult{}, err
+	}
+	return result, nil
+}

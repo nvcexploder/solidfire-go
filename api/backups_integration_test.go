@@ -120,6 +120,31 @@ func Test_StartRemoteSolidFireRestore(t *testing.T) {
 	assert.NotEmpty(t, key)
 }
 
+func Test_ListAsyncResults(t *testing.T) {
+	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
+	subject := testClient(t)
+	_, err := subject.ListAllAsyncTasks(context.Background(), api.ListAsyncResultsRequest{})
+	assert.NoError(t, err)
+}
+
+func Test_GetAsyncResult(t *testing.T) {
+	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
+	subject := testClient(t)
+	id := fetchAsyncTask(t, subject)
+	_, err := subject.GetAsyncTask(context.Background(), api.GetAsyncResultRequest{
+		AsyncHandle: id,
+	})
+	assert.NoError(t, err)
+	assert.NotZero(t, id)
+}
+
+func Test_ListEvents(t *testing.T) {
+	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
+	subject := testClient(t)
+	_, err := subject.GetEventList(context.Background(), api.ListEventsRequest{})
+	assert.NoError(t, err)
+}
+
 func identifyBackupSnapshot(t *testing.T, c *api.Client) (volumeId, snapshotId int64) {
 	snaps, err := c.ListSnapshots(context.Background(), api.ListSnapshotsRequest{})
 	if err != nil {
@@ -142,4 +167,15 @@ func identifyRestoreVolume(t *testing.T, c *api.Client) (volumeId int64) {
 		t.Fatal("found no volume for testing")
 	}
 	return vols[0].VolumeID
+}
+
+func fetchAsyncTask(t *testing.T, c *api.Client) (taskID api.AsyncResultID) {
+	res, err := c.ListAllAsyncTasks(context.Background(), api.ListAsyncResultsRequest{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(res.AsyncHandles) < 1 {
+		t.Fatal("found no async task for testing")
+	}
+	return res.AsyncHandles[0].AsyncResultID
 }

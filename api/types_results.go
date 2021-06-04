@@ -773,3 +773,13 @@ type UpdateBulkVolumeStatusResult struct {
 	Url        string      `json:"url"`
 	Attributes interface{} `json:"attributes"`
 }
+
+type GetAsyncResult struct {
+	Status         string      `json:"status"`
+	Result         interface{} `json:"result,omitempty"`
+	Error          interface{} `json:"error,omitempty"`
+	ResultType     string      `json:"resultType"`
+	Details        interface{} `json:"details,omitempty"`
+	CreateTime     string      `json:"createTime"`
+	LastUpdateTime string      `json:"lastUpdateTime"`
+}
