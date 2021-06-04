@@ -244,8 +244,8 @@ type GetAccountEfficiencyRequest struct {
 }
 
 type GetAsyncResultRequest struct {
-	AsyncHandle int64 `json:"asyncHandle"`
-	KeepResult  bool  `json:"keepResult,omitempty"`
+	AsyncHandle AsyncResultID `json:"asyncHandle"`
+	KeepResult  bool          `json:"keepResult,omitempty"`
 }
 
 type GetBackupTargetRequest struct {
@@ -356,9 +356,17 @@ type ListDriveStatsRequest struct {
 }
 
 type ListEventsRequest struct {
-	MaxEvents    int64 `json:"maxEvents,omitempty"`
-	StartEventID int64 `json:"startEventID,omitempty"`
-	EndEventID   int64 `json:"endEventID,omitempty"`
+	MaxEvents        int64  `json:"maxEvents,omitempty"`
+	StartEventID     int64  `json:"startEventID,omitempty"`
+	EndEventID       int64  `json:"endEventID,omitempty"`
+	EventType        string `json:"eventType,omitempty"`
+	DriveID          int64  `json:"driveID,omitempty"`
+	StartPublishTime string `json:"startPublishTime,omitempty"`
+	EndPublishTime   string `json:"endPublishTime,omitempty"`
+	NodeID           int64  `json:"nodeID,omitempty"`
+	StartReportTime  string `json:"startReportTime,omitempty"`
+	EndReportTime    string `json:"endReportTime,omitempty"`
+	ServiceID        int64  `json:"serviceID,omitempty"`
 }
 
 type ListGroupSnapshotsRequest struct {
@@ -853,13 +861,4 @@ type UpdateBulkVolumeStatusRequest struct {
 	PercentComplete string      `json:"percentComplete,omitempty"`
 	Message         string      `json:"message,omitempty"`
 	Attributes      interface{} `json:"attributes,omitempty"`
-}
-
-type ListAsyncTaskRequest struct {
-	AsyncResultTypes []string `json:"asyncResultTypes,omitempty"`
-}
-
-type GetAsyncTaskRequest struct {
-	AsyncHandle AsyncResultID `json:"asyncHandle"`
-	KeepResult  bool          `json:"keepResult,omitempty"`
 }

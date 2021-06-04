@@ -774,11 +774,7 @@ type UpdateBulkVolumeStatusResult struct {
 	Attributes interface{} `json:"attributes"`
 }
 
-type ListAsyncTaskResult struct {
-	AsyncHandles []AsyncHandle `json:"asyncHandles"`
-}
-
-type AsyncResult struct {
+type GetAsyncResult struct {
 	Status         string      `json:"status"`
 	Result         interface{} `json:"result,omitempty"`
 	Error          interface{} `json:"error,omitempty"`

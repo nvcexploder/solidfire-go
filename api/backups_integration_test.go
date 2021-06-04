@@ -121,22 +121,27 @@ func Test_StartRemoteSolidFireRestore(t *testing.T) {
 }
 
 func Test_ListAsyncResults(t *testing.T) {
+	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
 	subject := testClient(t)
-	_, err := subject.ListAllAsyncTasks(context.Background())
+	_, err := subject.ListAllAsyncTasks(context.Background(), api.ListAsyncResultsRequest{})
 	assert.NoError(t, err)
 }
 
 func Test_GetAsyncResult(t *testing.T) {
+	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
 	subject := testClient(t)
 	id := fetchAsyncTask(t, subject)
-	_, err := subject.GetAsyncTask(context.Background(), id)
+	_, err := subject.GetAsyncTask(context.Background(), api.GetAsyncResultRequest{
+		AsyncHandle: id,
+	})
 	assert.NoError(t, err)
 	assert.NotZero(t, id)
 }
 
 func Test_ListEvents(t *testing.T) {
+	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
 	subject := testClient(t)
-	_, err := subject.GetEventList(context.Background())
+	_, err := subject.GetEventList(context.Background(), api.ListEventsRequest{})
 	assert.NoError(t, err)
 }
 
@@ -165,7 +170,7 @@ func identifyRestoreVolume(t *testing.T, c *api.Client) (volumeId int64) {
 }
 
 func fetchAsyncTask(t *testing.T, c *api.Client) (taskID api.AsyncResultID) {
-	res, err := c.ListAllAsyncTasks(context.Background())
+	res, err := c.ListAllAsyncTasks(context.Background(), api.ListAsyncResultsRequest{})
 	if err != nil {
 		t.Fatal(err)
 	}

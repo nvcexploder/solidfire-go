@@ -6,6 +6,11 @@ const (
 	FormatUncompressed = "uncompressed"
 	EndpointS3         = "s3"
 	EndpointSolidFire  = "solidfire"
+	DriveAdd           = "DriveAdd"
+	BulkVolume         = "BulkVolume"
+	Clone              = "Clone"
+	DriveRemoval       = "DriveRemoval"
+	RtfiPendingNode    = "RtfiPendingNode"
 
 	Gibibytes = 1024 * 1024 * 1024
 	Gigabytes = 1000 * 1000 * 1000

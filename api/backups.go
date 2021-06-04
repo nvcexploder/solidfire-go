@@ -89,30 +89,24 @@ func (c *Client) StartRemoteS3Restore(ctx context.Context, r S3RestoreRequest) (
 	return AsyncResultID(bvresult.AsyncHandle), nil
 }
 
-func (c *Client) ListAllAsyncTasks(ctx context.Context) (results ListAsyncTaskResult, err error) {
-	req := &ListAsyncTaskRequest{}
-	err = c.request(ctx, "ListAsyncResults", req, &results)
+func (c *Client) ListAllAsyncTasks(ctx context.Context, r ListAsyncResultsRequest) (results ListAsyncResultsResult, err error) {
+	err = c.request(ctx, "ListAsyncResults", r, &results)
 	if err != nil {
-		return ListAsyncTaskResult{}, err
+		return ListAsyncResultsResult{}, err
 	}
 	return results, nil
 }
 
-func (c *Client) GetAsyncTask(ctx context.Context, asyncID AsyncResultID) (result AsyncResult, err error) {
-	req := &GetAsyncTaskRequest{
-		AsyncHandle: asyncID,
-		KeepResult:  true,
-	}
-	err = c.request(ctx, "GetAsyncResult", req, &result)
+func (c *Client) GetAsyncTask(ctx context.Context, r GetAsyncResultRequest) (result GetAsyncResult, err error) {
+	err = c.request(ctx, "GetAsyncResult", r, &result)
 	if err != nil {
-		return AsyncResult{}, err
+		return GetAsyncResult{}, err
 	}
 	return result, nil
 }
 
-func (c *Client) GetEventList(ctx context.Context) (result ListEventsResult, err error) {
-	req := &ListEventsRequest{}
-	err = c.request(ctx, "ListEvents", req, &result)
+func (c *Client) GetEventList(ctx context.Context, r ListEventsRequest) (result ListEventsResult, err error) {
+	err = c.request(ctx, "ListEvents", r, &result)
 	if err != nil {
 		return ListEventsResult{}, err
 	}
