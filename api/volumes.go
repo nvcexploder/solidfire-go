@@ -7,6 +7,11 @@ import (
 
 const (
 	ErrNoVolumeFound = "No volume found with the given id"
+	// Valid volume access values
+	VolumeAccessPolicyReadOnly          = "readOnly"
+	VolumeAccessPolicyReadWrite         = "readWrite"
+	VolumeAccessPolicyLocked            = "locked"
+	VolumeAccessPolicyReplicationTarget = "replicationTarget"
 )
 
 func (c *Client) CreateVolume(ctx context.Context, req CreateVolumeRequest) (result *Volume, err error) {

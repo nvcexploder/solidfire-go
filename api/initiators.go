@@ -21,8 +21,11 @@ func (c *Client) CreateInitiators(ctx context.Context, initiators []CreateInitia
 }
 
 func (c *Client) ModifyInitiators(ctx context.Context, req []ModifyInitiator) (results []Initiator, err error) {
+	modReq := ModifyInitiatorsRequest{
+		Initiators: req,
+	}
 	miResult := ModifyInitiatorsResult{}
-	err = c.request(ctx, "ModifyInitiators", req, &miResult)
+	err = c.request(ctx, "ModifyInitiators", modReq, &miResult)
 	results = miResult.Initiators
 	return results, err
 }

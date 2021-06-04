@@ -542,7 +542,7 @@ type ModifyVolumeAccessGroupLunAssignmentsRequest struct {
 type ModifyVolumeAccessGroupRequest struct {
 	VolumeAccessGroupID    int64       `json:"volumeAccessGroupID"`
 	Name                   string      `json:"name,omitempty"`
-	Initiators             []string    `json:"initiators,omitempty"`
+	Initiators             []int64     `json:"initiators,omitempty"`
 	Volumes                []int64     `json:"volumes,omitempty"`
 	DeleteOrphanInitiators bool        `json:"deleteOrphanInitiators,omitempty"`
 	Attributes             interface{} `json:"attributes,omitempty"`
