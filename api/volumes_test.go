@@ -41,7 +41,7 @@ var testVolume = map[string]interface{}{
 	"volumeAccessGroups": []VolumeAccessGroup{},
 	"volumePairs":        []VolumePair{},
 	"sliceCount":         1,
-	"totalSize":          1500000000,
+	"totalSize":          int64(1.5 * Gigabytes),
 	"blockSize":          4096,
 	"attributes":         map[string]interface{}{},
 }
@@ -53,7 +53,7 @@ func TestCreateVolume(t *testing.T) {
 	defer mockReset()
 
 	ctx := context.Background()
-	var totalSize int64 = 1500000000
+	var totalSize int64 = int64(1.5 * Gigabytes)
 	req := CreateVolumeRequest{
 		Name:       "solidfire-sdk-test",
 		AccountID:  testAccountId,
@@ -97,7 +97,7 @@ func TestModifyVolume(t *testing.T) {
 	for k, v := range testVolume {
 		testVolume2[k] = v
 	}
-	var newTotalSize int64 = 2000000000
+	var newTotalSize int64 = 2 * Gigabytes
 	testVolume2["TotalSize"] = newTotalSize
 	mockResp := buildSFResponseWrapper(map[string]interface{}{"Volume": testVolume2})
 	mockReset := activateMock(t, c, mockResp)

@@ -30,7 +30,7 @@ var (
 	defaultVolumeRequestData = api.CreateVolumeRequest{
 		Name:       testVolumeName,
 		AccountID:  testAccountId,
-		TotalSize:  1000000000,
+		TotalSize:  1 * api.Gigabytes,
 		Enable512e: true,
 	}
 )
