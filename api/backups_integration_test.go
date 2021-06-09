@@ -1,4 +1,4 @@
-package tests
+package api_test
 
 import (
 	"context"
@@ -97,14 +97,14 @@ func Test_StartRemoteSolidFireRestore(t *testing.T) {
 
 func Test_ListAsyncResults(t *testing.T) {
 	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
-	subject := testClient(t)
+	subject := BuildTestClient(t)
 	_, err := subject.ListAllAsyncTasks(context.Background(), api.ListAsyncResultsRequest{})
 	assert.NoError(t, err)
 }
 
 func Test_GetAsyncResult(t *testing.T) {
 	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
-	subject := testClient(t)
+	subject := BuildTestClient(t)
 	id := fetchAsyncTask(t, subject)
 	_, err := subject.GetAsyncTask(context.Background(), api.GetAsyncResultRequest{
 		AsyncHandle: id,
@@ -115,7 +115,7 @@ func Test_GetAsyncResult(t *testing.T) {
 
 func Test_ListEvents(t *testing.T) {
 	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
-	subject := testClient(t)
+	subject := BuildTestClient(t)
 	_, err := subject.GetEventList(context.Background(), api.ListEventsRequest{})
 	assert.NoError(t, err)
 }
