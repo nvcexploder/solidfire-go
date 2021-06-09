@@ -3,7 +3,7 @@ TAG := $(shell git describe --tags | sed s/v//g)
 TIMESTAMP := $(shell date '+%FT%T%z')
 VERSION_PKG := github.com/cloud-pi/spc-sdk-go/pkg/common/version
 GOLDFLAGS := -X ${VERSION_PKG}.Timestamp=${TIMESTAMP} -X ${VERSION_PKG}.Commit=${COMMIT} -X ${VERSION_PKG}.Tag=${TAG}
-GOBUILDPKGS := ./api ./examples ./integration_tests
+GOBUILDPKGS := ./api ./examples ./api/internal/**
 GOPRIVATE := GOPRIVATE=github.com/joyent,github.com/cloud-pi
 GOLANG := 1.16
 LINTER_VERSION := 1.38.0
