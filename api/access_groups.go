@@ -2,8 +2,7 @@ package api
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
+	"fmt"
 )
 
 const (
@@ -47,7 +46,7 @@ func (c *Client) GetVolumeAccessGroup(ctx context.Context, id int64) (result *Vo
 		result = &accessGroups[0]
 		return result, err
 	} else {
-		return nil, errors.New(ErrNoVolumeAccessGroupFound)
+		return nil, BuildRequestError(ErrVolumeAccessGroupIDDoesNotExist, fmt.Sprintf("Volume access group with the given id %d does not exist", id))
 	}
 }
 

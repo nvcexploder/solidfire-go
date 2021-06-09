@@ -131,6 +131,13 @@ func BuildClient(target string, username string, password string, version string
 	return SFClient, nil
 }
 
+func BuildRequestError(name string, message string) *RequestError {
+	return &RequestError{
+		Name:    name,
+		Message: message,
+	}
+}
+
 func (c *Client) request(ctx context.Context, method string, params interface{}, result interface{}) (err error) {
 	sfr := SFResponse{}
 	response, err := c.HTTPClient.R().
@@ -153,10 +160,7 @@ func (c *Client) request(ctx context.Context, method string, params interface{},
 	if response.IsError() {
 		// auth errors return a 401 and html instead of json
 		if response.StatusCode() == 401 {
-			return &RequestError{
-				Name:    ErrInvalidCredentials,
-				Message: response.Status(),
-			}
+			return BuildRequestError(ErrInvalidCredentials, response.Status())
 		}
 		// making a bit of an assumption here that any other kind of http error will also not include
 		// json so we'll just return something generic.  Unfortunately, resty doesn't tell us if

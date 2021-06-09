@@ -2,7 +2,7 @@ package api
 
 import (
 	"context"
-	"errors"
+	"fmt"
 )
 
 const (
@@ -54,7 +54,7 @@ func (c *Client) GetVolumeById(ctx context.Context, id int64) (result *Volume, e
 	if len(lvr.Volumes) > 0 {
 		result = &lvr.Volumes[0]
 	} else if err == nil {
-		err = errors.New(ErrNoVolumeFound)
+		err = BuildRequestError(ErrVolumeIDDoesNotExist, fmt.Sprintf("Volume with the given id %d does not exist", id))
 	}
 	return result, err
 }

@@ -2,8 +2,7 @@ package api
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
+	"fmt"
 )
 
 const (
@@ -57,6 +56,6 @@ func (c *Client) GetInitiator(ctx context.Context, id int64) (result *Initiator,
 		result = &initiators[0]
 		return result, err
 	} else {
-		return nil, errors.New(ErrNoInitiatorFound)
+		return nil, BuildRequestError(ErrInitiatorDoesNotExist, fmt.Sprintf("Initiator with the given id %d does not exist", id))
 	}
 }
