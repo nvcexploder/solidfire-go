@@ -2,11 +2,7 @@ package api
 
 import (
 	"context"
-	"errors"
-)
-
-const (
-	ErrNoSnapshotFound = "No snapshot found with the given id"
+	"fmt"
 )
 
 func (c *Client) CreateSnapshot(ctx context.Context, req CreateSnapshotRequest) (result *Snapshot, err error) {
@@ -45,7 +41,7 @@ func (c *Client) GetSnapshotById(ctx context.Context, id int64) (result *Snapsho
 	if len(resp) > 0 {
 		result = &resp[0]
 	} else if err == nil {
-		err = errors.New(ErrNoSnapshotFound)
+		err = BuildRequestError(ErrSnapshotIDDoesNotExist, fmt.Sprintf("Snapshot with the given id %d does not exist", id))
 	}
 	return result, err
 }

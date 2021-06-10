@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -147,4 +148,18 @@ func TestGetVolumeById(t *testing.T) {
 	require.Equal(t, "active", resp.Status)
 	require.Equal(t, "readWrite", resp.Access)
 	require.Equal(t, "iqn.2010-01.com.solidfire:youn.solidfire-sdk-test.3576", resp.Iqn)
+}
+
+func TestGetVolumeByIdError(t *testing.T) {
+	c := getTestClient(t)
+	mockResp := buildSFResponseWrapper(map[string]interface{}{"Volumes": []map[string]interface{}{}})
+	mockReset := activateMock(t, c, mockResp)
+	defer mockReset()
+
+	ctx := context.Background()
+	_, err := c.GetVolumeById(ctx, testVolumeId)
+	require.NotNil(t, err)
+	var reqErr *RequestError
+	require.True(t, errors.As(err, &reqErr))
+	require.Equal(t, ErrVolumeIDDoesNotExist, reqErr.Name)
 }
