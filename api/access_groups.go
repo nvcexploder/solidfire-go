@@ -5,10 +5,6 @@ import (
 	"fmt"
 )
 
-const (
-	ErrNoVolumeAccessGroupFound = "No VolumeAccessGroup found for the given id"
-)
-
 func (c *Client) CreateVolumeAccessGroup(ctx context.Context, req CreateVolumeAccessGroupRequest) (result *VolumeAccessGroup, err error) {
 	cvagResult := CreateVolumeAccessGroupResult{}
 	err = c.request(ctx, "CreateVolumeAccessGroup", req, &cvagResult)

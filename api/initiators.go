@@ -5,10 +5,6 @@ import (
 	"fmt"
 )
 
-const (
-	ErrNoInitiatorFound = "No Initiator found for the given id"
-)
-
 func (c *Client) CreateInitiators(ctx context.Context, initiators []CreateInitiator) (results []Initiator, err error) {
 	req := CreateInitiatorsRequest{
 		Initiators: initiators,

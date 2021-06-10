@@ -6,7 +6,6 @@ import (
 )
 
 const (
-	ErrNoVolumeFound = "No volume found with the given id"
 	// Valid volume access values
 	VolumeAccessPolicyReadOnly          = "readOnly"
 	VolumeAccessPolicyReadWrite         = "readWrite"

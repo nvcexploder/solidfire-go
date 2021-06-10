@@ -5,10 +5,6 @@ import (
 	"fmt"
 )
 
-const (
-	ErrNoSnapshotFound = "No snapshot found with the given id"
-)
-
 func (c *Client) CreateSnapshot(ctx context.Context, req CreateSnapshotRequest) (result *Snapshot, err error) {
 	csr := CreateSnapshotResult{}
 	err = c.request(ctx, "CreateSnapshot", req, &csr)
