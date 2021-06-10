@@ -13,6 +13,10 @@ type AddDrivesResult struct {
 	AsyncHandle int64 `json:"asyncHandle,omitempty"`
 }
 
+type AddInitiatorsToVolumeAccessGroupResult struct {
+	VolumeAccessGroup VolumeAccessGroup `json:"volumeAccessGroup,omitempty"`
+}
+
 type AddLdapClusterAdminResult struct {
 	ClusterAdminID int64 `json:"clusterAdminID,omitempty"`
 }
@@ -24,6 +28,10 @@ type AddNodesResult struct {
 
 type AddVirtualNetworkResult struct {
 	VirtualNetworkID int64 `json:"virtualNetworkID,omitempty"`
+}
+
+type AddVolumesToVolumeAccessGroup struct {
+	VolumeAccessGroup VolumeAccessGroup `json:"volumeAccessGroup,omitempty"`
 }
 
 type AsyncHandleResult struct {
@@ -660,6 +668,14 @@ type ModifyVolumesResult struct {
 type NodeStateResult struct {
 	NodeID int64         `json:"nodeID"`
 	Result NodeStateInfo `json:"result,omitempty"`
+}
+
+type RemoveInitiatorsFromVolumeAccessGroupResult struct {
+	VolumeAccessGroup VolumeAccessGroup `json:"volumeAccessGroup,omitempty"`
+}
+
+type RemoveVolumesFromVolumeAccessGroupResult struct {
+	VolumeAccessGroup VolumeAccessGroup `json:"volumeAccessGroup,omitempty"`
 }
 
 type ResetDrivesResult struct {

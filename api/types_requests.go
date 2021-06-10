@@ -21,8 +21,8 @@ type AddDrivesRequest struct {
 }
 
 type AddInitiatorsToVolumeAccessGroupRequest struct {
-	VolumeAccessGroupID int64    `json:"volumeAccessGroupID"`
-	Initiators          []string `json:"initiators"`
+	VolumeAccessGroupID int64   `json:"volumeAccessGroupID"`
+	Initiators          []int64 `json:"initiators"`
 }
 
 type AddLdapClusterAdminRequest struct {
@@ -156,12 +156,10 @@ type CreateSupportBundleRequest struct {
 }
 
 type CreateVolumeAccessGroupRequest struct {
-	Name               string      `json:"name"`
-	Initiators         []string    `json:"initiators,omitempty"`
-	Volumes            []int64     `json:"volumes,omitempty"`
-	VirtualNetworkID   []int64     `json:"virtualNetworkID,omitempty"`
-	VirtualNetworkTags []int64     `json:"virtualNetworkTags,omitempty"`
-	Attributes         interface{} `json:"attributes,omitempty"`
+	Name       string      `json:"name"`
+	Initiators []int64     `json:"initiators,omitempty"`
+	Volumes    []int64     `json:"volumes,omitempty"`
+	Attributes interface{} `json:"attributes,omitempty"`
 }
 
 type CreateVolumeRequest struct {
@@ -197,7 +195,9 @@ type DeleteStorageContainersRequest struct {
 }
 
 type DeleteVolumeAccessGroupRequest struct {
-	VolumeAccessGroupID int64 `json:"volumeAccessGroupID"`
+	VolumeAccessGroupID    int64 `json:"volumeAccessGroupID"`
+	DeleteOrphanInitiators bool  `json:"deleteOrphanInitiators,omitempty"`
+	Force                  bool  `json:"force,omitempty"`
 }
 
 type DeleteVolumeRequest struct {
@@ -541,10 +541,8 @@ type ModifyVolumeAccessGroupLunAssignmentsRequest struct {
 
 type ModifyVolumeAccessGroupRequest struct {
 	VolumeAccessGroupID    int64       `json:"volumeAccessGroupID"`
-	VirtualNetworkID       []int64     `json:"virtualNetworkID,omitempty"`
-	VirtualNetworkTags     []int64     `json:"virtualNetworkTags,omitempty"`
 	Name                   string      `json:"name,omitempty"`
-	Initiators             []string    `json:"initiators,omitempty"`
+	Initiators             []int64     `json:"initiators,omitempty"`
 	Volumes                []int64     `json:"volumes,omitempty"`
 	DeleteOrphanInitiators bool        `json:"deleteOrphanInitiators,omitempty"`
 	Attributes             interface{} `json:"attributes,omitempty"`
@@ -613,9 +611,9 @@ type RemoveDrivesRequest struct {
 }
 
 type RemoveInitiatorsFromVolumeAccessGroupRequest struct {
-	VolumeAccessGroupID    int64    `json:"volumeAccessGroupID"`
-	Initiators             []string `json:"initiators"`
-	DeleteOrphanInitiators bool     `json:"deleteOrphanInitiators,omitempty"`
+	VolumeAccessGroupID    int64   `json:"volumeAccessGroupID"`
+	Initiators             []int64 `json:"initiators"`
+	DeleteOrphanInitiators bool    `json:"deleteOrphanInitiators,omitempty"`
 }
 
 type RemoveNodesRequest struct {

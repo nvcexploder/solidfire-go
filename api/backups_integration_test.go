@@ -2,7 +2,6 @@ package api_test
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/joyent/solidfire-sdk/api"
@@ -10,37 +9,13 @@ import (
 	"gotest.tools/skip"
 )
 
-const IntegrationTestHelp = "Set $SOLIDFIRE_HOST, $SOLIDFIRE_USER, and $SOLIDFIRE_PASS to enable integration tests"
-
-func IntegrationTestsDisabled() bool {
-	host := os.Getenv("SOLIDFIRE_HOST")
-	username := os.Getenv("SOLIDFIRE_USER")
-	password := os.Getenv("SOLIDFIRE_PASS")
-	return host == "" || username == "" || password == ""
-}
-
-func testClient(t *testing.T) *api.Client {
-	host := os.Getenv("SOLIDFIRE_HOST")
-	username := os.Getenv("SOLIDFIRE_USER")
-	password := os.Getenv("SOLIDFIRE_PASS")
-	if host == "" || username == "" || password == "" {
-		t.Fatal("Environment variables SOLIDFIRE_HOST, SOLIDFIRE_USER, and SOLIDFIRE_PASS must be set")
-	}
-
-	c, err := api.BuildClient(host, username, password, "12.3", 443, 3)
-	if err != nil {
-		t.Fatalf("Error connecting: %s\n", err)
-	}
-	return c
-}
-
 // Note: These tests simply verify that the request is accepted and a handle to the async operation is returned
 // It's expected that the actual operation will fail (and in fact desired since we don't want the restore tests
 // to overwrite anything)
 
 func Test_RemoteS3Backup(t *testing.T) {
 	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
-	subject := testClient(t)
+	subject := BuildTestClient(t)
 	vol, snap := identifyBackupSnapshot(t, subject)
 	id, err := subject.StartRemoteS3Backup(context.Background(), api.S3BackupRequest{
 		VolumeID:   vol,
@@ -64,7 +39,7 @@ func Test_RemoteS3Backup(t *testing.T) {
 
 func Test_StartRemoteSolidFireBackup(t *testing.T) {
 	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
-	subject := testClient(t)
+	subject := BuildTestClient(t)
 	vol, snap := identifyBackupSnapshot(t, subject)
 	id, err := subject.StartRemoteSolidFireBackup(context.Background(), api.SolidFireBackupRequest{
 		VolumeID:   vol,
@@ -87,7 +62,7 @@ func Test_StartRemoteSolidFireBackup(t *testing.T) {
 
 func Test_StartRemoteS3Restore(t *testing.T) {
 	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
-	subject := testClient(t)
+	subject := BuildTestClient(t)
 	// subject.HTTPClient.Debug = true
 	vol := identifyRestoreVolume(t, subject)
 	id, err := subject.StartRemoteS3Restore(context.Background(), api.S3RestoreRequest{
@@ -111,7 +86,7 @@ func Test_StartRemoteS3Restore(t *testing.T) {
 
 func Test_StartRemoteSolidFireRestore(t *testing.T) {
 	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
-	subject := testClient(t)
+	subject := BuildTestClient(t)
 	vol := identifyRestoreVolume(t, subject)
 	id, key, err := subject.StartRemoteSolidFireRestore(context.Background(), vol, api.FormatNative)
 
@@ -122,14 +97,14 @@ func Test_StartRemoteSolidFireRestore(t *testing.T) {
 
 func Test_ListAsyncResults(t *testing.T) {
 	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
-	subject := testClient(t)
+	subject := BuildTestClient(t)
 	_, err := subject.ListAllAsyncTasks(context.Background(), api.ListAsyncResultsRequest{})
 	assert.NoError(t, err)
 }
 
 func Test_GetAsyncResult(t *testing.T) {
 	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
-	subject := testClient(t)
+	subject := BuildTestClient(t)
 	id := fetchAsyncTask(t, subject)
 	_, err := subject.GetAsyncTask(context.Background(), api.GetAsyncResultRequest{
 		AsyncHandle: id,
@@ -140,7 +115,7 @@ func Test_GetAsyncResult(t *testing.T) {
 
 func Test_ListEvents(t *testing.T) {
 	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
-	subject := testClient(t)
+	subject := BuildTestClient(t)
 	_, err := subject.GetEventList(context.Background(), api.ListEventsRequest{})
 	assert.NoError(t, err)
 }

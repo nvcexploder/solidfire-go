@@ -77,17 +77,22 @@ func (e *ResourceNotFoundError) GetName() string    { return e.Name }
 func (e *ResourceNotFoundError) GetMessage() string { return e.Message }
 
 const (
-	ErrNoTarget               = "Client requires a valid target"
-	ErrNoCredentials          = "Client requires a valid username and password"
-	ErrInvalidCredentials     = "Provided credentials are invalid"
-	ErrUnexpectedServerError  = "Unexpected server error"
-	ErrVolumeIDDoesNotExist   = "xVolumeIDDoesNotExist"
-	ErrSnapshotIDDoesNotExist = "xSnapshotIDDoesNotExist"
-	ErrAccountIDDoesNotExist  = "xAccountIDDoesNotExist"
-	ErrQoSPolicyDoesNotExist  = "xQoSPolicyDoesNotExist"
-	ErrExceededLimit          = "xExceededLimit"
-	ErrUnrecognizedEnumString = "xUnrecognizedEnumString"
-	ErrInvalidAPIParameter    = "xInvalidAPIParameter"
+	ErrNoTarget                        = "Client requires a valid target"
+	ErrNoCredentials                   = "Client requires a valid username and password"
+	ErrInvalidCredentials              = "Provided credentials are invalid"
+	ErrUnexpectedServerError           = "Unexpected server error"
+	ErrVolumeIDDoesNotExist            = "xVolumeIDDoesNotExist"
+	ErrSnapshotIDDoesNotExist          = "xSnapshotIDDoesNotExist"
+	ErrAccountIDDoesNotExist           = "xAccountIDDoesNotExist"
+	ErrQoSPolicyDoesNotExist           = "xQoSPolicyDoesNotExist"
+	ErrVolumeAccessGroupIDDoesNotExist = "xVolumeAccessGroupIdDoesNotExist"
+	ErrInitiatorDoesNotExist           = "xInitiatorDoesNotExist"
+	ErrInitiatorExists                 = "xInitiatorExists"
+	ErrExceededLimit                   = "xExceededLimit"
+	ErrUnrecognizedEnumString          = "xUnrecognizedEnumString"
+	ErrInvalidAPIParameter             = "xInvalidAPIParameter"
+	ErrInvalidParameter                = "xInvalidParameter"
+	ErrInvalidParameterType            = "xInvalidParameterType"
 )
 
 func BuildClient(target string, username string, password string, version string, port int, timeoutSecs int) (c *Client, err error) {
@@ -166,12 +171,14 @@ func (c *Client) request(ctx context.Context, method string, params interface{},
 
 	if sfr.Error.Code != 0 {
 		switch sfr.Error.Name {
-		case ErrVolumeIDDoesNotExist, ErrSnapshotIDDoesNotExist, ErrAccountIDDoesNotExist, ErrQoSPolicyDoesNotExist:
+		case ErrVolumeIDDoesNotExist, ErrSnapshotIDDoesNotExist, ErrAccountIDDoesNotExist,
+			ErrQoSPolicyDoesNotExist, ErrVolumeAccessGroupIDDoesNotExist, ErrInitiatorDoesNotExist:
 			return &ResourceNotFoundError{
 				Name:    sfr.Error.Name,
 				Message: sfr.Error.Message,
 			}
-		case ErrExceededLimit, ErrUnrecognizedEnumString, ErrInvalidAPIParameter:
+		case ErrExceededLimit, ErrUnrecognizedEnumString, ErrInvalidAPIParameter,
+			ErrInvalidParameter, ErrInvalidParameterType, ErrInitiatorExists:
 			return &RequestError{
 				Name:    sfr.Error.Name,
 				Message: sfr.Error.Message,
