@@ -93,6 +93,7 @@ const (
 	ErrInvalidAPIParameter             = "xInvalidAPIParameter"
 	ErrInvalidParameter                = "xInvalidParameter"
 	ErrInvalidParameterType            = "xInvalidParameterType"
+	ErrMVIPNotPaired                   = "xMVIPNotPaired"
 )
 
 func BuildClient(target string, username string, password string, version string, port int, timeoutSecs int) (c *Client, err error) {
@@ -182,7 +183,7 @@ func (c *Client) request(ctx context.Context, method string, params interface{},
 				Message: sfr.Error.Message,
 			}
 		case ErrExceededLimit, ErrUnrecognizedEnumString, ErrInvalidAPIParameter,
-			ErrInvalidParameter, ErrInvalidParameterType, ErrInitiatorExists:
+			ErrInvalidParameter, ErrInvalidParameterType, ErrInitiatorExists, ErrMVIPNotPaired:
 			return &RequestError{
 				Name:    sfr.Error.Name,
 				Message: sfr.Error.Message,
