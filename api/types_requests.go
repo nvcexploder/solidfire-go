@@ -552,7 +552,6 @@ type ModifyVolumePairRequest struct {
 	VolumeID     int64  `json:"volumeID"`
 	PausedManual bool   `json:"pausedManual,omitempty"`
 	Mode         string `json:"mode,omitempty"`
-	PauseLimit   int64  `json:"pauseLimit,omitempty"`
 }
 
 type ModifyVolumeRequest struct {

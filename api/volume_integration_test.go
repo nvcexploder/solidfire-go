@@ -188,3 +188,41 @@ func Test_AddRemoveFromVolumeAccessGroup(t *testing.T) {
 	assert.Nil(t, modVagErr4)
 	assert.Equal(t, []int64{initiator.InitiatorID}, modifiedVag5.InitiatorIDs)
 }
+
+func Test_VolumePairing(t *testing.T) {
+	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
+	// establish two volumes, one in each cluster
+	subject := BuildTestClient(t)
+	subject2 := BuildTestClientHost2(t)
+	eVol := createEphemeralVolume(t, subject, defaultVolumeRequestData)
+	defer eVol.Destroy()
+	volume := eVol.Entity.(api.Volume)
+	volume2Req := api.CreateVolumeRequest{
+		Name:       "2",
+		AccountID:  testAccountId,
+		TotalSize:  1 * api.Gigabytes,
+		Enable512e: true,
+	}
+	eVol2 := createEphemeralVolume(t, subject2, volume2Req)
+	defer eVol2.Destroy()
+	volume2 := eVol2.Entity.(api.Volume)
+	// Create and manipulate the volume pair to test
+	ctx := context.Background()
+	volumePairingKey, err := subject.StartVolumePairing(ctx, volume.VolumeID, api.VolumePairingModeAsync)
+	assert.Nil(t, err)
+	err = subject2.CompleteVolumePairing(ctx, volume2.VolumeID, volumePairingKey)
+	assert.Nil(t, err)
+	modReq := api.ModifyVolumePairRequest{
+		Mode:     api.VolumePairingModeSync,
+		VolumeID: volume2.VolumeID,
+	}
+	err = subject2.ModifyVolumePair(ctx, modReq)
+	assert.Nil(t, err)
+	volPair, err := subject2.GetActivePairedVolume(ctx, volume2.VolumeID)
+	assert.Nil(t, err)
+	assert.Equal(t, volume2.VolumeID, volPair.VolumeID)
+	assert.Equal(t, volume.VolumeID, volPair.VolumePairs[0].RemoteVolumeID)
+	assert.Equal(t, api.VolumePairingModeSync, volPair.VolumePairs[0].RemoteReplication.Mode)
+	err = subject.RemoveVolumePair(ctx, volume.VolumeID)
+	assert.Nil(t, err)
+}

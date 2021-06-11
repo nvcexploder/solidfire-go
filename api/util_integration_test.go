@@ -11,9 +11,10 @@ const IntegrationTestHelp = "Set $SOLIDFIRE_HOST, $SOLIDFIRE_USER, and $SOLIDFIR
 
 func IntegrationTestsDisabled() bool {
 	host := os.Getenv("SOLIDFIRE_HOST")
+	host2 := os.Getenv("SOLIDFIRE_HOST2")
 	username := os.Getenv("SOLIDFIRE_USER")
 	password := os.Getenv("SOLIDFIRE_PASS")
-	return host == "" || username == "" || password == ""
+	return host == "" || host2 == "" || username == "" || password == ""
 }
 
 func BuildTestClient(t *testing.T) *api.Client {
@@ -21,7 +22,22 @@ func BuildTestClient(t *testing.T) *api.Client {
 	username := os.Getenv("SOLIDFIRE_USER")
 	password := os.Getenv("SOLIDFIRE_PASS")
 	if host == "" || username == "" || password == "" {
-		t.Fatal("Environment variables SOLIDFIRE_HOST, SOLIDFIRE_USER, and SOLIDFIRE_PASS must be set")
+		t.Fatal("Environment variables SOLIDFIRE_HOST, SOLIDFIRE_HOST2, SOLIDFIRE_USER, and SOLIDFIRE_PASS must be set")
+	}
+
+	c, err := api.BuildClient(host, username, password, "12.3", 443, 3)
+	if err != nil {
+		t.Fatalf("Error connecting: %s\n", err)
+	}
+	return c
+}
+
+func BuildTestClientHost2(t *testing.T) *api.Client {
+	host := os.Getenv("SOLIDFIRE_HOST2")
+	username := os.Getenv("SOLIDFIRE_USER")
+	password := os.Getenv("SOLIDFIRE_PASS")
+	if host == "" || username == "" || password == "" {
+		t.Fatal("Environment variables SOLIDFIRE_HOST, SOLIDFIRE_HOST2, SOLIDFIRE_USER, and SOLIDFIRE_PASS must be set")
 	}
 
 	c, err := api.BuildClient(host, username, password, "12.3", 443, 3)
