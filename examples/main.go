@@ -5,8 +5,23 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/joyent/solidfire-sdk/api"
 )
+
+// Example for setting a middleware for recording raw requests and responses
+func middlewareExample(c *api.Client) (err error) {
+	c.HTTPClient.OnAfterResponse(func(client *resty.Client, resp *resty.Response) error {
+		req := *resp.Request
+		// N.B. - Using fmt.Printf here for simplicity and to avoid a dependency but a real
+		// client would likely use a logger.
+		fmt.Printf("Request: %#v\n", req)
+		fmt.Printf("Response Header: %#v\n", resp.Header())
+		fmt.Printf("Response Body: %#v\n", string(resp.Body()))
+		return nil
+	})
+	return nil
+}
 
 func volumeExamples(c *api.Client, accountId int64) (volume *api.Volume, err error) {
 	ctx := context.Background()
@@ -81,6 +96,11 @@ func main() {
 	c, err := api.BuildClient(host, username, password, "12.3", 443, 3)
 	if err != nil {
 		fmt.Printf("Error connecting: %s\n", err)
+		panic(err)
+	}
+	err = middlewareExample(c)
+	if err != nil {
+		fmt.Printf("Error with setting resty middleware: %s\n", err)
 		panic(err)
 	}
 
