@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"time"
 
 	"fmt"
 	"testing"
@@ -17,21 +16,22 @@ var (
 	defaultPassword = "supersecret"
 	defaultVersion  = "12.3"
 	defaultPort     = 443
-	defaultTimeout  = 10 * time.Second
 )
 
 func TestBuildClientErrors(t *testing.T) {
+	opts := ClientOptions{}
 	var err error
-	_, err = BuildClient("", defaultUsername, defaultPassword, defaultVersion, defaultPort, defaultTimeout)
+	_, err = BuildClient("", defaultUsername, defaultPassword, defaultVersion, defaultPort, opts)
 	require.Equal(t, err.Error(), ErrNoTarget)
-	_, err = BuildClient(defaultTarget, "", defaultPassword, defaultVersion, defaultPort, defaultTimeout)
+	_, err = BuildClient(defaultTarget, "", defaultPassword, defaultVersion, defaultPort, opts)
 	require.Equal(t, err.Error(), ErrNoCredentials)
-	_, err = BuildClient(defaultTarget, defaultUsername, "", defaultVersion, defaultPort, defaultTimeout)
+	_, err = BuildClient(defaultTarget, defaultUsername, "", defaultVersion, defaultPort, opts)
 	require.Equal(t, err.Error(), ErrNoCredentials)
 }
 
 func TestBuildClient(t *testing.T) {
-	c, err := BuildClient(defaultTarget, defaultUsername, defaultPassword, defaultVersion, 443, 0)
+	opts := ClientOptions{}
+	c, err := BuildClient(defaultTarget, defaultUsername, defaultPassword, defaultVersion, 443, opts)
 	require.Nil(t, err)
 	require.Equal(t, c.ApiUrl, fmt.Sprintf("https://%s:%d/json-rpc/%s", defaultTarget, defaultPort, defaultVersion))
 }

@@ -22,11 +22,6 @@ type Client struct {
 	HTTPClient   *resty.Client
 }
 
-type Credentials struct {
-	username string
-	password string
-}
-
 type SFResponse struct {
 	Id     int32                  `json:"id"`
 	Result map[string]interface{} `json:"result"`
@@ -77,6 +72,7 @@ func (e *ResourceNotFoundError) Error() string {
 func (e *ResourceNotFoundError) GetName() string    { return e.Name }
 func (e *ResourceNotFoundError) GetMessage() string { return e.Message }
 
+// Error names
 const (
 	ErrNoTarget                        = "Client requires a valid target"
 	ErrNoCredentials                   = "Client requires a valid username and password"
@@ -97,23 +93,23 @@ const (
 	ErrMVIPNotPaired                   = "xMVIPNotPaired"
 )
 
-func requestRetryCondition(r *resty.Response, err error) bool {
-	// There was an Http error, should be retried
-	if err != nil {
-		return true
-	}
-	// Parse response body to check for errors.
-	_, error := processResponseErrors(r)
-	if error != nil {
-		// A ServiceError should be retried.
-		// Other errors represent a malformed request or missing entity and should not be retried.
-		var sErr *ServiceError
-		return errors.As(error, &sErr)
-	}
-	return false
+// default client options
+const (
+	defaultTimeoutSecs      = time.Second * 30
+	defaultRetryCount       = 5
+	defaultRetryWaitTime    = time.Millisecond * 200
+	defaultRetryMaxWaitTime = time.Second * 3
+)
+
+type ClientOptions struct {
+	TimeoutSecs      time.Duration
+	UseRetry         bool
+	RetryCount       int
+	RetryWaitTime    time.Duration
+	RetryMaxWaitTime time.Duration
 }
 
-func BuildClient(target string, username string, password string, version string, port int, timeoutSecs time.Duration) (c *Client, err error) {
+func BuildClient(target string, username string, password string, version string, port int, opts ClientOptions) (c *Client, err error) {
 	// sanity check inputs
 	if target == "" {
 		err = errors.New(ErrNoTarget)
@@ -126,23 +122,47 @@ func BuildClient(target string, username string, password string, version string
 	if port == 0 {
 		port = 443
 	}
-	if timeoutSecs == 0 {
-		timeoutSecs = 40
-	}
 	if version == "" {
 		version = "12.3"
 	}
-	creds := Credentials{username: username, password: password}
+
+	// Destructure opts and set defaults
+	timeoutSecs := defaultTimeoutSecs
+	if opts.TimeoutSecs != 0 {
+		timeoutSecs = opts.TimeoutSecs
+	}
+	useRetry := opts.UseRetry
+	retryCount := defaultRetryCount
+	retryWaitTime := defaultRetryWaitTime
+	retryMaxWaitTime := defaultRetryMaxWaitTime
+	if useRetry {
+		if opts.RetryCount != 0 {
+			retryCount = opts.RetryCount
+		}
+		if opts.RetryWaitTime != 0 {
+			retryWaitTime = opts.RetryWaitTime
+		}
+		if opts.RetryMaxWaitTime != 0 {
+			retryMaxWaitTime = opts.RetryMaxWaitTime
+		}
+	}
+
+	// Build resty client instance
 	apiUrl := fmt.Sprintf("https://%s:%d/json-rpc/%s", target, port, version)
 	r := resty.New().
 		SetHeader("Accept", "application/json").
-		SetBasicAuth(creds.username, creds.password).
+		SetBasicAuth(username, password).
 		SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}).
-		SetTimeout(timeoutSecs * time.Second).
-		SetRetryCount(5).
-		SetRetryWaitTime(200 * time.Millisecond).
-		AddRetryCondition(requestRetryCondition)
+		SetTimeout(timeoutSecs)
+	if useRetry {
+		r = r.
+			SetRetryCount(retryCount).
+			SetRetryWaitTime(retryWaitTime).
+			SetRetryMaxWaitTime(retryMaxWaitTime).
+			AddRetryCondition(requestRetryCondition)
+	}
 
+	// Build return Client
 	SFClient := &Client{
 		Target:     target,
 		ApiUrl:     apiUrl,
@@ -158,6 +178,22 @@ func BuildRequestError(name string, message string) *RequestError {
 		Name:    name,
 		Message: message,
 	}
+}
+
+func requestRetryCondition(r *resty.Response, err error) bool {
+	// There was an Http error, should be retried
+	if err != nil {
+		return true
+	}
+	// Parse response body to check for errors.
+	_, error := processResponseErrors(r)
+	if error != nil {
+		// A ServiceError should be retried.
+		// Other errors represent a malformed request or missing entity and should not be retried.
+		var sErr *ServiceError
+		return errors.As(error, &sErr)
+	}
+	return false
 }
 
 // Process the given resty.Response into the SolidFire jRPC response struct and check for any error
