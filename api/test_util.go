@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
@@ -15,7 +16,7 @@ func getTestClient(t *testing.T) (client *Client) {
 		defaultPassword = "supersecret"
 		defaultVersion  = "12.3"
 		defaultPort     = 443
-		defaultTimeout  = 10
+		defaultTimeout  = 10 * time.Second
 	)
 	client, err := BuildClient(defaultTarget, defaultUsername, defaultPassword, defaultVersion, defaultPort, defaultTimeout)
 	if err != nil {

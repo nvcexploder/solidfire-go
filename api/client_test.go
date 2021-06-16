@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"time"
 
 	"fmt"
 	"testing"
@@ -16,7 +17,7 @@ var (
 	defaultPassword = "supersecret"
 	defaultVersion  = "12.3"
 	defaultPort     = 443
-	defaultTimeout  = 10
+	defaultTimeout  = 10 * time.Second
 )
 
 func TestBuildClientErrors(t *testing.T) {
