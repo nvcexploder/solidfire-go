@@ -2,10 +2,12 @@ package api
 
 import (
 	"context"
+	"time"
 
 	"fmt"
 	"testing"
 
+	"github.com/jarcoal/httpmock"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
@@ -34,6 +36,39 @@ func TestBuildClient(t *testing.T) {
 	c, err := BuildClient(defaultTarget, defaultUsername, defaultPassword, defaultVersion, 443, opts)
 	require.Nil(t, err)
 	require.Equal(t, c.ApiUrl, fmt.Sprintf("https://%s:%d/json-rpc/%s", defaultTarget, defaultPort, defaultVersion))
+}
+
+func TestBuildClientWithRetries(t *testing.T) {
+	retryCount := 1
+	opts := ClientOptions{
+		TimeoutSecs:      time.Second * 10,
+		UseRetry:         true,
+		RetryCount:       retryCount,
+		RetryWaitTime:    time.Millisecond * 1,
+		RetryMaxWaitTime: time.Millisecond * 1,
+	}
+	c, err := BuildClient(defaultTarget, defaultUsername, defaultPassword, defaultVersion, 443, opts)
+	require.Nil(t, err)
+
+	mockReset := activateMock(t, c, SFResponse{
+		Error: SFAPIError{
+			Code:    1,
+			Message: "The server encountered an unanticipated error",
+			Name:    "Unhandled service error",
+		},
+		Result: nil,
+		Id:     1,
+	})
+	defer mockReset()
+	ctx := context.Background()
+	req := ListVolumesRequest{}
+	_, err = c.ListVolumes(ctx, req)
+	callCount := httpmock.DefaultTransport.GetTotalCallCount()
+
+	require.NotNil(t, err)
+	var r *ServiceError
+	require.True(t, errors.As(err, &r))
+	require.Equal(t, retryCount+1, callCount)
 }
 
 func TestClientRequestErrors(t *testing.T) {
