@@ -25,8 +25,12 @@ func BuildTestClient(t *testing.T) *api.Client {
 		t.Fatal("Environment variables SOLIDFIRE_HOST, SOLIDFIRE_HOST2, SOLIDFIRE_USER, and SOLIDFIRE_PASS must be set")
 	}
 
-	opts := api.ClientOptions{}
-	c, err := api.BuildClient(host, username, password, "12.3", 443, opts)
+	opts := api.ClientOptions{
+		Target:   host,
+		Username: username,
+		Password: password,
+	}
+	c, err := api.BuildClient(opts)
 	if err != nil {
 		t.Fatalf("Error connecting: %s\n", err)
 	}
@@ -41,8 +45,12 @@ func BuildTestClientHost2(t *testing.T) *api.Client {
 		t.Fatal("Environment variables SOLIDFIRE_HOST, SOLIDFIRE_HOST2, SOLIDFIRE_USER, and SOLIDFIRE_PASS must be set")
 	}
 
-	opts := api.ClientOptions{}
-	c, err := api.BuildClient(host, username, password, "12.3", 443, opts)
+	opts := api.ClientOptions{
+		Target:   host,
+		Username: username,
+		Password: password,
+	}
+	c, err := api.BuildClient(opts)
 	if err != nil {
 		t.Fatalf("Error connecting: %s\n", err)
 	}

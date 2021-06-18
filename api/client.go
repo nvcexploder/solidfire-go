@@ -15,7 +15,6 @@ type Client struct {
 	Target       string
 	Port         int
 	RequestCount int64
-	Timeout      time.Duration
 	Version      string
 	ApiUrl       string
 	Name         string
@@ -102,6 +101,11 @@ const (
 )
 
 type ClientOptions struct {
+	Target           string
+	Username         string
+	Password         string
+	Port             int
+	Version          string
 	TimeoutSecs      time.Duration
 	UseRetry         bool
 	RetryCount       int
@@ -109,67 +113,66 @@ type ClientOptions struct {
 	RetryMaxWaitTime time.Duration
 }
 
-func BuildClient(target string, username string, password string, version string, port int, opts ClientOptions) (c *Client, err error) {
-	// sanity check inputs
-	if target == "" {
-		err = errors.New(ErrNoTarget)
-		return nil, err
+func (co *ClientOptions) validate() error {
+	// sanity check inputs, returning error if needed
+	if co.Target == "" {
+		return errors.New(ErrNoTarget)
 	}
-	if username == "" || password == "" {
-		err = errors.New(ErrNoCredentials)
-		return nil, err
-	}
-	if port == 0 {
-		port = 443
-	}
-	if version == "" {
-		version = "12.3"
+	if co.Username == "" || co.Password == "" {
+		return errors.New(ErrNoCredentials)
 	}
 
-	// Destructure opts and set defaults
-	timeoutSecs := defaultTimeoutSecs
-	if opts.TimeoutSecs != 0 {
-		timeoutSecs = opts.TimeoutSecs
+	// Set defaults for any unset values
+	if co.Port == 0 {
+		co.Port = 443
 	}
-	useRetry := opts.UseRetry
-	retryCount := defaultRetryCount
-	retryWaitTime := defaultRetryWaitTime
-	retryMaxWaitTime := defaultRetryMaxWaitTime
-	if useRetry {
-		if opts.RetryCount != 0 {
-			retryCount = opts.RetryCount
-		}
-		if opts.RetryWaitTime != 0 {
-			retryWaitTime = opts.RetryWaitTime
-		}
-		if opts.RetryMaxWaitTime != 0 {
-			retryMaxWaitTime = opts.RetryMaxWaitTime
-		}
+	if co.Version == "" {
+		co.Version = "12.3"
+	}
+	if co.TimeoutSecs == 0 {
+		co.TimeoutSecs = defaultTimeoutSecs
+	}
+	if co.RetryCount == 0 {
+		co.RetryCount = defaultRetryCount
+	}
+	if co.RetryWaitTime == 0 {
+		co.RetryWaitTime = defaultRetryWaitTime
+	}
+	if co.RetryMaxWaitTime == 0 {
+		co.RetryMaxWaitTime = defaultRetryMaxWaitTime
+	}
+	return nil
+}
+
+func BuildClient(opts ClientOptions) (c *Client, err error) {
+	err = opts.validate()
+	if err != nil {
+		return nil, err
 	}
 
 	// Build resty client instance
-	apiUrl := fmt.Sprintf("https://%s:%d/json-rpc/%s", target, port, version)
+	apiUrl := fmt.Sprintf("https://%s:%d/json-rpc/%s", opts.Target, opts.Port, opts.Version)
 	r := resty.New().
 		SetHeader("Accept", "application/json").
-		SetBasicAuth(username, password).
+		SetBasicAuth(opts.Username, opts.Password).
 		SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}).
-		SetTimeout(timeoutSecs)
-	if useRetry {
+		SetTimeout(opts.TimeoutSecs)
+	if opts.UseRetry {
 		r = r.
-			SetRetryCount(retryCount).
-			SetRetryWaitTime(retryWaitTime).
-			SetRetryMaxWaitTime(retryMaxWaitTime).
+			SetRetryCount(opts.RetryCount).
+			SetRetryWaitTime(opts.RetryWaitTime).
+			SetRetryMaxWaitTime(opts.RetryMaxWaitTime).
 			AddRetryCondition(requestRetryCondition)
 	}
 
 	// Build return Client
 	SFClient := &Client{
-		Target:     target,
+		Target:     opts.Target,
 		ApiUrl:     apiUrl,
-		Version:    version,
-		Port:       port,
+		Version:    opts.Version,
+		Port:       opts.Port,
 		HTTPClient: r,
-		Timeout:    timeoutSecs}
+	}
 	return SFClient, nil
 }
 
@@ -234,10 +237,7 @@ func processResponseErrors(resp *resty.Response) (*SFResponse, error) {
 			}
 		case ErrExceededLimit, ErrUnrecognizedEnumString, ErrInvalidAPIParameter,
 			ErrInvalidParameter, ErrInvalidParameterType, ErrInitiatorExists, ErrMVIPNotPaired:
-			return nil, &RequestError{
-				Name:    sfr.Error.Name,
-				Message: sfr.Error.Message,
-			}
+			return nil, BuildRequestError(sfr.Error.Name, sfr.Error.Message)
 		default:
 			return nil, &ServiceError{
 				Name:    sfr.Error.Name,

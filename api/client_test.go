@@ -21,54 +21,85 @@ var (
 )
 
 func TestBuildClientErrors(t *testing.T) {
-	opts := ClientOptions{}
 	var err error
-	_, err = BuildClient("", defaultUsername, defaultPassword, defaultVersion, defaultPort, opts)
+	opts1 := ClientOptions{
+		Target:   "",
+		Username: defaultUsername,
+		Password: defaultPassword,
+	}
+	_, err = BuildClient(opts1)
+	require.NotNil(t, err)
 	require.Equal(t, err.Error(), ErrNoTarget)
-	_, err = BuildClient(defaultTarget, "", defaultPassword, defaultVersion, defaultPort, opts)
+	opts2 := ClientOptions{
+		Target:   defaultTarget,
+		Username: "",
+		Password: defaultPassword,
+	}
+	_, err = BuildClient(opts2)
+	require.NotNil(t, err)
 	require.Equal(t, err.Error(), ErrNoCredentials)
-	_, err = BuildClient(defaultTarget, defaultUsername, "", defaultVersion, defaultPort, opts)
+	opts3 := ClientOptions{
+		Target:   defaultTarget,
+		Username: defaultUsername,
+		Password: "",
+	}
+	_, err = BuildClient(opts3)
+	require.NotNil(t, err)
 	require.Equal(t, err.Error(), ErrNoCredentials)
 }
 
 func TestBuildClient(t *testing.T) {
-	opts := ClientOptions{}
-	c, err := BuildClient(defaultTarget, defaultUsername, defaultPassword, defaultVersion, 443, opts)
+	opts := ClientOptions{
+		Target:   defaultTarget,
+		Username: defaultUsername,
+		Password: defaultPassword,
+	}
+	c, err := BuildClient(opts)
 	require.Nil(t, err)
 	require.Equal(t, c.ApiUrl, fmt.Sprintf("https://%s:%d/json-rpc/%s", defaultTarget, defaultPort, defaultVersion))
 }
 
-func TestBuildClientWithRetries(t *testing.T) {
+func TestBuildClientNoRetriesRequestError(t *testing.T) {
+	// Build a client that will (quickly) retry on service error
 	retryCount := 1
 	opts := ClientOptions{
+		Target:           defaultTarget,
+		Username:         defaultUsername,
+		Password:         defaultPassword,
 		TimeoutSecs:      time.Second * 10,
 		UseRetry:         true,
 		RetryCount:       retryCount,
 		RetryWaitTime:    time.Millisecond * 1,
 		RetryMaxWaitTime: time.Millisecond * 1,
 	}
-	c, err := BuildClient(defaultTarget, defaultUsername, defaultPassword, defaultVersion, 443, opts)
+	c, err := BuildClient(opts)
 	require.Nil(t, err)
 
 	mockReset := activateMock(t, c, SFResponse{
 		Error: SFAPIError{
 			Code:    1,
-			Message: "The server encountered an unanticipated error",
-			Name:    "Unhandled service error",
+			Name:    ErrUnrecognizedEnumString,
+			Message: "Given Access value is invalid",
 		},
 		Result: nil,
 		Id:     1,
 	})
 	defer mockReset()
 	ctx := context.Background()
-	req := ListVolumesRequest{}
-	_, err = c.ListVolumes(ctx, req)
+	req := CreateVolumeRequest{
+		Name:       "testvolume1",
+		AccountID:  1,
+		TotalSize:  1 * Gigabytes,
+		Enable512e: true,
+		Access:     "notAValidAccessValue",
+	}
+	_, err = c.CreateVolume(ctx, req)
 	callCount := httpmock.DefaultTransport.GetTotalCallCount()
 
 	require.NotNil(t, err)
-	var r *ServiceError
+	var r *RequestError
 	require.True(t, errors.As(err, &r))
-	require.Equal(t, retryCount+1, callCount)
+	require.Equal(t, 1, callCount)
 }
 
 func TestClientRequestErrors(t *testing.T) {

@@ -9,15 +9,14 @@ import (
 )
 
 func getTestClient(t *testing.T) (client *Client) {
-	var (
-		defaultTarget   = "localhost"
-		defaultUsername = "test-username"
-		defaultPassword = "supersecret"
-		defaultVersion  = "12.3"
-		defaultPort     = 443
-	)
-	opts := ClientOptions{}
-	client, err := BuildClient(defaultTarget, defaultUsername, defaultPassword, defaultVersion, defaultPort, opts)
+	opts := ClientOptions{
+		Target:   "localhost",
+		Username: "test-username",
+		Password: "supersecret",
+		Version:  "12.3",
+		Port:     443,
+	}
+	client, err := BuildClient(opts)
 	if err != nil {
 		require.Fail(t, "Failed to build test client", err)
 	}
