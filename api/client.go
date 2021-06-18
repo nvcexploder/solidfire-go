@@ -260,7 +260,6 @@ func (c *Client) request(ctx context.Context, method string, params interface{},
 		}).
 		SetResult(&sfr).
 		Post(c.ApiUrl)
-	fmt.Print("after client request\n")
 	c.RequestCount++
 	if err != nil {
 		return err
