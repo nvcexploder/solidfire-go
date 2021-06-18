@@ -93,7 +93,12 @@ func main() {
 		return
 	}
 
-	c, err := api.BuildClient(host, username, password, "12.3", 443, 3)
+	opts := api.ClientOptions{
+		Target:   host,
+		Username: username,
+		Password: password,
+	}
+	c, err := api.BuildClient(opts)
 	if err != nil {
 		fmt.Printf("Error connecting: %s\n", err)
 		panic(err)
