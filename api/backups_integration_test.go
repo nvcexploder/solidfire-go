@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/joyent/solidfire-sdk/api"
@@ -16,7 +17,8 @@ import (
 func Test_RemoteS3Backup(t *testing.T) {
 	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
 	subject := BuildTestClient(t)
-	vol, snap := identifyBackupSnapshot(t, subject)
+	vol, snap, cleanup := createTestSnapshot(t, subject)
+	defer cleanup()
 	id, err := subject.StartRemoteS3Backup(context.Background(), api.S3BackupRequest{
 		VolumeID:   vol,
 		SnapshotID: snap,
@@ -40,7 +42,8 @@ func Test_RemoteS3Backup(t *testing.T) {
 func Test_StartRemoteSolidFireBackup(t *testing.T) {
 	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
 	subject := BuildTestClient(t)
-	vol, snap := identifyBackupSnapshot(t, subject)
+	vol, snap, cleanup := createTestSnapshot(t, subject)
+	defer cleanup()
 	id, err := subject.StartRemoteSolidFireBackup(context.Background(), api.SolidFireBackupRequest{
 		VolumeID:   vol,
 		SnapshotID: snap,
@@ -64,7 +67,8 @@ func Test_StartRemoteS3Restore(t *testing.T) {
 	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
 	subject := BuildTestClient(t)
 	// subject.HTTPClient.Debug = true
-	vol := identifyRestoreVolume(t, subject)
+	vol, cleanup := createTestVolume(t, subject)
+	defer cleanup()
 	id, err := subject.StartRemoteS3Restore(context.Background(), api.S3RestoreRequest{
 		VolumeID: vol,
 		Range: api.BulkVolumeRange{
@@ -87,7 +91,8 @@ func Test_StartRemoteS3Restore(t *testing.T) {
 func Test_StartRemoteSolidFireRestore(t *testing.T) {
 	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
 	subject := BuildTestClient(t)
-	vol := identifyRestoreVolume(t, subject)
+	vol, cleanup := createTestVolume(t, subject)
+	defer cleanup()
 	id, key, err := subject.StartRemoteSolidFireRestore(context.Background(), vol, api.FormatNative)
 
 	assert.NoError(t, err)
@@ -120,28 +125,44 @@ func Test_ListEvents(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func identifyBackupSnapshot(t *testing.T, c *api.Client) (volumeId, snapshotId int64) {
-	snaps, err := c.ListSnapshots(context.Background(), api.ListSnapshotsRequest{})
+func createTestSnapshot(t *testing.T, c *api.Client) (volumeId, snapshotId int64, cleanup func()) {
+	createVolReq := api.CreateVolumeRequest{
+		Name:       testVolumeName,
+		AccountID:  testAccountId,
+		TotalSize:  1 * api.Gigabytes,
+		Enable512e: true,
+	}
+	eVol := createEphemeralVolume(t, c, createVolReq)
+	volume := eVol.Entity.(api.Volume)
+	snapReq := api.CreateSnapshotRequest{
+		VolumeID: volume.VolumeID,
+		Name:     "test-snapshot",
+	}
+	snap, err := c.CreateSnapshot(context.Background(), snapReq)
 	if err != nil {
+		eVol.Destroy()
 		t.Fatal(err)
 	}
-	if len(snaps) < 1 {
-		t.Fatal(("found no snapshot for testing"))
+	cleanup = func() {
+		eVol.Destroy()
+		err = c.DeleteSnapshot(context.Background(), snap.SnapshotID)
+		if err != nil {
+			fmt.Printf("Failed to delete entity %#v during test cleanup. Error was: %s\n", snap, err)
+		}
 	}
-	return snaps[0].VolumeID, snaps[0].SnapshotID
+	return volume.VolumeID, snap.SnapshotID, cleanup
 }
 
-func identifyRestoreVolume(t *testing.T, c *api.Client) (volumeId int64) {
-	vols, err := c.ListVolumes(context.Background(), api.ListVolumesRequest{
-		Limit: 1,
-	})
-	if err != nil {
-		t.Fatal(err)
+func createTestVolume(t *testing.T, c *api.Client) (volumeId int64, cleanup func()) {
+	createVolReq := api.CreateVolumeRequest{
+		Name:       testVolumeName,
+		AccountID:  testAccountId,
+		TotalSize:  1 * api.Gigabytes,
+		Enable512e: true,
 	}
-	if len(vols) < 1 {
-		t.Fatal("found no volume for testing")
-	}
-	return vols[0].VolumeID
+	eVol := createEphemeralVolume(t, c, createVolReq)
+	volume := eVol.Entity.(api.Volume)
+	return volume.VolumeID, eVol.Destroy
 }
 
 func fetchAsyncTask(t *testing.T, c *api.Client) (taskID api.AsyncResultID) {

@@ -2,8 +2,6 @@ package api_test
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/joyent/solidfire-sdk/api"
@@ -34,64 +32,6 @@ var (
 		Enable512e: true,
 	}
 )
-
-type EphemeralEntity struct {
-	Entity  interface{}
-	Destroy func()
-}
-
-func buildEphmeralEntity(entity interface{}, entityDestroy func() (err error)) (e EphemeralEntity) {
-	destroyer := func() {
-		err := entityDestroy()
-		if err != nil {
-			fmt.Printf("Failed to entity %#v during test cleanup. Error was: %s\n", entity, err)
-		}
-	}
-	return EphemeralEntity{
-		Entity:  entity,
-		Destroy: destroyer,
-	}
-}
-
-func createEphemeralInitiator(t *testing.T, c *api.Client, initiatorArgs api.CreateInitiator) (result EphemeralEntity) {
-	ctx := context.Background()
-	initiators, err := c.CreateInitiators(ctx, []api.CreateInitiator{initiatorArgs})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(initiators) < 1 {
-		// Should be impossible
-		t.Fatal(errors.New("Failed to create initiator"))
-	}
-	initiator := initiators[0]
-	return buildEphmeralEntity(initiator, func() (err error) { return c.DeleteInitiators(ctx, []int64{initiator.InitiatorID}) })
-}
-
-func createEphemeralVolumeAccessGroup(t *testing.T, c *api.Client, req api.CreateVolumeAccessGroupRequest) (result EphemeralEntity) {
-	ctx := context.Background()
-	volumeAccessGroup, err := c.CreateVolumeAccessGroup(ctx, req)
-	if err != nil {
-		t.Fatal(err)
-	}
-	delReq := api.DeleteVolumeAccessGroupRequest{
-		VolumeAccessGroupID:    volumeAccessGroup.VolumeAccessGroupID,
-		DeleteOrphanInitiators: false,
-		Force:                  true,
-	}
-	return buildEphmeralEntity(*volumeAccessGroup, func() (err error) { return c.DeleteVolumeAccessGroup(ctx, delReq) })
-}
-
-func createEphemeralVolume(t *testing.T, c *api.Client, req api.CreateVolumeRequest) (result EphemeralEntity) {
-	ctx := context.Background()
-	volume, err := c.CreateVolume(ctx, req)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return buildEphmeralEntity(*volume, func() (err error) {
-		_, err = c.DeleteVolume(ctx, volume.VolumeID)
-		return err
-	})
-}
 
 func Test_CreateVolumeAndInitiator(t *testing.T) {
 	skip.If(t, IntegrationTestsDisabled, IntegrationTestHelp)
