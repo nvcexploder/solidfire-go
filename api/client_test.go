@@ -59,6 +59,43 @@ func TestBuildClient(t *testing.T) {
 	require.Equal(t, c.ApiUrl, fmt.Sprintf("https://%s:%d/json-rpc/%s", defaultTarget, defaultPort, defaultVersion))
 }
 
+func TestBuildClientWithRetries(t *testing.T) {
+	// Build a client that will (quickly) retry on service error
+	retryCount := 1
+	opts := ClientOptions{
+		Target:           defaultTarget,
+		Username:         defaultUsername,
+		Password:         defaultPassword,
+		TimeoutSecs:      time.Second * 10,
+		UseRetry:         true,
+		RetryCount:       retryCount,
+		RetryWaitTime:    time.Millisecond * 1,
+		RetryMaxWaitTime: time.Millisecond * 1,
+	}
+	c, err := BuildClient(opts)
+	require.Nil(t, err)
+
+	mockReset := activateMock(t, c, SFResponse{
+		Error: SFAPIError{
+			Code:    1,
+			Name:    "Unhandled service error",
+			Message: "The server encountered an unanticipated error",
+		},
+		Result: nil,
+		Id:     1,
+	})
+	defer mockReset()
+	ctx := context.Background()
+	req := ListVolumesRequest{}
+	_, err = c.ListVolumes(ctx, req)
+	callCount := httpmock.DefaultTransport.GetTotalCallCount()
+
+	require.NotNil(t, err)
+	var r *ServiceError
+	require.True(t, errors.As(err, &r))
+	require.Equal(t, retryCount+1, callCount)
+}
+
 func TestBuildClientNoRetriesRequestError(t *testing.T) {
 	// Build a client that will (quickly) retry on service error
 	retryCount := 1
